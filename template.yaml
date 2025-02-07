@@ -1,0 +1,351 @@
+# TODO
+# - Enhance Policies for each lambda function
+# - Nested template.yml structure [https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-template-nested-applications.html]
+# - Solar linter for build process
+
+AWSTemplateFormatVersion: 2010-09-09
+Transform:
+  - AWS::Serverless-2016-10-31
+Description: >-
+  khana-backend
+
+Parameters:
+  DBHOST:
+    Description: ""
+    Type: "String"
+    Default: "dms.c5g64064s955.ap-south-1.rds.amazonaws.com"
+  DBNAME:
+    Description: ""
+    Type: "String"
+    Default: "dmsdatabase"
+  DBUSER:
+    Description: ""
+    Type: "String"
+    Default: "dmsdatabase"
+  DBPASSWORD:
+    Description: ""
+    Type: "String"
+    Default: "teamtech#2k25"
+  DBPORT:
+    Description: ""
+    Type: "String"
+    Default: "3306"
+  
+
+
+# Parameters:
+#   DBHOST:
+#     Description: ""
+#     Type: "String"
+#     Default: "ka-devops.crqw00kkqjni.ap-south-1.rds.amazonaws.com"
+#   DBNAME:
+#     Description: ""
+#     Type: "String"
+#     Default: "khana_prod"
+#   DBUSER:
+#     Description: ""
+#     Type: "String"
+#     Default: "kaprod"
+#   DBPASSWORD:
+#     Description: ""
+#     Type: "String"
+#     Default: "Khana2020"
+#   DBPORT:
+#     Description: ""
+#     Type: "String"
+#     Default: "3306"
+#   SMSKEY:
+#     Description: ""
+#     Type: "String"
+#     Default: "e2b658cd81f940afa781b043878a21da"
+#   SMSHEADER:
+#     Description: ""
+#     Type: "String"
+#     Default: "ea2a110e707044d7875e536624e75a95"
+#   SMSURL:
+#     Description: ""
+#     Type: "String"
+#     Default: "http://sms.pearlsms.com/public/sms/sendjson"
+
+
+Globals:
+  # Api:
+  #   Auth:
+  #     AddDefaultAuthorizerToCorsPreflight: false
+  #     DefailtAuthorizer: RequestAuthorizer
+  #     Authorizers:
+  #       RequestAuthorizer:
+  #         FunctionPayloadType: REQUEST
+  #         FunctionArn: !GetAtt ka-authorizer-function.Arn
+  #         Identity:
+  #           ReauthorizeEvery: 0
+    # Cors:
+    #   AllowMethods: "'GET,POST,OPTIONS'"
+    #   AlloweHeaders: "'*'"
+    #   AllowOrigin: "'*'"
+    #   AllowCredentials: "'*'"
+    # GatewayResponses:
+    #   DEFAULT_4XX:
+    #     ResponseParameters:
+    #       Headers:
+    #         Access-Control-Allow-Menthods: "'GET,POST,OPTIONS'"          
+    #         Access-Control-Allow-Headers: "'*'"
+    #         Access-Control-Allow-Origin: "'*'"
+    #         Access-Control-Allow-Credentials: "'*'"
+    #   DEFAULT_5XX:
+    #     ResponseParameters:
+    #       Headers:
+    #         Access-Control-Allow-Menthods: "'GET,POST,OPTIONS'"          
+    #         Access-Control-Allow-Headers: "'*'"
+    #         Access-Control-Allow-Origin: "'*'"
+    #         Access-Control-Allow-Credentials: "'*'"
+
+  Api:
+    Cors:
+      AllowHeaders: "'*'"
+      AllowMethods: "'GET,POST, PUT, OPTIONS'" 
+      AllowOrigin: "'*'"  
+
+
+  Function:
+    Environment:
+      Variables:
+        DB_HOST: !Ref DBHOST
+        DB_NAME: !Ref DBNAME
+        DB_USER: !Ref DBUSER
+        DB_PASSWORD: !Ref DBPASSWORD
+        DB_PORT: !Ref DBPORT
+        EMAIL_USER: "teamtech993@gmail.com"         # Email address for sending emails
+        EMAIL_PASS: "Tech@2468"         # App-specific password or email account password
+        ADMIN_EMAIL: "jeeva7777@gmail.com"       # Admin email to receive notifications
+        EMAIL_SERVICE: "gmail"                    # Email service (e.g., Gmail, Outlook, etc.)
+        NODE_ENV: "test" 
+        LIMIT: 20
+    Runtime: nodejs18.x
+    MemorySize: 256
+    Timeout: 60
+    Layers:
+      - !Ref CommonLayer
+Resources:
+  lambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+        - arn:aws:iam::aws:policy/SecretsManagerReadWrite
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaRole
+        - arn:aws:iam::aws:policy/AWSLambdaExecute
+        - arn:aws:iam::aws:policy/AmazonS3FullAccess
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Policies:
+        - PolicyName: SSMParameterAccess
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: 
+                  - ssm:GetParameter
+                Resource: "arn:aws:ssm:ap-south-1:509399613408:parameter/emp-backend/jwt-secret"
+
+
+  CommonLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: common-layer
+      Description: Code shared across all lambda functions
+      ContentUri: src/layers/common-layer
+      CompatibleRuntimes:
+        - nodejs18.x
+      RetentionPolicy: Delete
+    Metadata:
+      BuildMethod: makefile
+
+ 
+  registerNGO:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/handlers/registerNGO
+      Handler: index.handler
+      FunctionName: registerNGO
+      Description: "A lambda to create NGO."
+      Role: !GetAtt lambdaExecutionRole.Arn
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: "/registerNGO"
+            Method: POST
+      Environment:
+        Variables:
+          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"                  
+      # Layers:
+      #  - !Ref CommonCodeLayer
+    Metadata:
+      BuildMethod: nodejs18.x
+
+  
+  manageDonor:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/handlers/manageDonor
+      Handler: index.handler
+      FunctionName: manageDonor
+      Description: "A lambda to handle donor."
+      Role: !GetAtt lambdaExecutionRole.Arn
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: "/manageDonor"
+            Method: POST
+      Environment:
+        Variables:
+          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"            
+      # Layers:
+      #  - !Ref CommonCodeLayer
+    Metadata:
+      BuildMethod: nodejs18.x
+
+  manageLeads:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/handlers/manageLeads
+      Handler: index.handler
+      FunctionName: manageLeads
+      Description: "A lambda to handle contact Leads."
+      Role: !GetAtt lambdaExecutionRole.Arn
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: "/manageLeads"
+            Method: POST
+      Environment:
+        Variables:
+          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"            
+      # Layers:
+      #  - !Ref CommonCodeLayer
+    Metadata:
+      BuildMethod: nodejs18.x
+
+  registerUsers:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/handlers/registerUsers
+      Handler: index.handler
+      FunctionName: registerUsers
+      Description: "A lambda to handle register users."
+      Role: !GetAtt lambdaExecutionRole.Arn
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: "/registerUsers"
+            Method: POST
+      Environment:
+        Variables:
+          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"            
+      # Layers:
+      #  - !Ref CommonCodeLayer
+    Metadata:
+      BuildMethod: nodejs18.x
+
+  updateNGO:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/handlers/updateNGO
+      Handler: index.handler
+      FunctionName: updateNGO
+      Description: "A lambda to updateNGO."
+      Role: !GetAtt lambdaExecutionRole.Arn
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: "/updateNGO"
+            Method: POST
+      Environment:
+        Variables:
+          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"                  
+      # Layers:
+      #  - !Ref CommonCodeLayer
+    Metadata:
+      BuildMethod: nodejs18.x
+
+  manageDonations:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/handlers/manageDonations
+      Handler: index.handler
+      FunctionName: manageDonations
+      Description: "A lambda to add or update donations."
+      Role: !GetAtt lambdaExecutionRole.Arn
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: "/manageDonations"
+            Method: POST
+      Environment:
+        Variables:
+          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"            
+      # Layers:
+      #  - !Ref CommonCodeLayer
+    Metadata:
+      BuildMethod: nodejs18.x
+
+  userSignIn:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/handlers/userSignIn
+      Handler: index.handler
+      FunctionName: userSignIn
+      Description: "A lambda to handle user sign in."
+      Role: !GetAtt lambdaExecutionRole.Arn
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: "/userSignIn"
+            Method: POST            
+      Environment:
+        Variables:
+          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"
+      Environment:
+        Variables:
+          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"                  
+      # Layers:
+      #  - !Ref CommonCodeLayer
+    Metadata:
+      BuildMethod: nodejs18.x
+
+  manageSubscriptionPlan:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/handlers/manageSubscriptionPlan
+      Handler: index.handler
+      FunctionName: manageSubscriptionPlan
+      Description: "A lambda to handle subscription Plan."
+      Role: !GetAtt lambdaExecutionRole.Arn
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: "/manageSubscriptionPlan"
+            Method: POST
+      Environment:
+        Variables:
+          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"            
+      # Layers:
+      #  - !Ref CommonCodeLayer
+    Metadata:
+      BuildMethod: nodejs18.x  

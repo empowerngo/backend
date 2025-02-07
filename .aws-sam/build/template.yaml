@@ -1,0 +1,280 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform:
+- AWS::Serverless-2016-10-31
+Description: khana-backend
+Parameters:
+  DBHOST:
+    Description: ''
+    Type: String
+    Default: dms.c5g64064s955.ap-south-1.rds.amazonaws.com
+  DBNAME:
+    Description: ''
+    Type: String
+    Default: dmsdatabase
+  DBUSER:
+    Description: ''
+    Type: String
+    Default: dmsdatabase
+  DBPASSWORD:
+    Description: ''
+    Type: String
+    Default: teamtech#2k25
+  DBPORT:
+    Description: ''
+    Type: String
+    Default: '3306'
+Globals:
+  Api:
+    Cors:
+      AllowHeaders: '''*'''
+      AllowMethods: '''GET,POST, PUT, OPTIONS'''
+      AllowOrigin: '''*'''
+  Function:
+    Environment:
+      Variables:
+        DB_HOST:
+          Ref: DBHOST
+        DB_NAME:
+          Ref: DBNAME
+        DB_USER:
+          Ref: DBUSER
+        DB_PASSWORD:
+          Ref: DBPASSWORD
+        DB_PORT:
+          Ref: DBPORT
+        EMAIL_USER: teamtech993@gmail.com
+        EMAIL_PASS: Tech@2468
+        ADMIN_EMAIL: jeeva7777@gmail.com
+        EMAIL_SERVICE: gmail
+        NODE_ENV: test
+        LIMIT: 20
+    Runtime: nodejs18.x
+    MemorySize: 256
+    Timeout: 60
+    Layers:
+    - Ref: CommonLayer
+Resources:
+  lambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+      - arn:aws:iam::aws:policy/SecretsManagerReadWrite
+      - arn:aws:iam::aws:policy/service-role/AWSLambdaRole
+      - arn:aws:iam::aws:policy/AWSLambdaExecute
+      - arn:aws:iam::aws:policy/AmazonS3FullAccess
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Policies:
+      - PolicyName: SSMParameterAccess
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - ssm:GetParameter
+            Resource: arn:aws:ssm:ap-south-1:509399613408:parameter/emp-backend/jwt-secret
+  CommonLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: common-layer
+      Description: Code shared across all lambda functions
+      ContentUri: CommonLayer
+      CompatibleRuntimes:
+      - nodejs18.x
+      RetentionPolicy: Delete
+    Metadata:
+      BuildMethod: makefile
+      SamResourceId: CommonLayer
+  registerNGO:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: registerNGO
+      Handler: index.handler
+      FunctionName: registerNGO
+      Description: A lambda to create NGO.
+      Role:
+        Fn::GetAtt:
+        - lambdaExecutionRole
+        - Arn
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /registerNGO
+            Method: POST
+      Environment:
+        Variables:
+          JWT_SECRET_PARAM: /emp-backend/jwt-secret
+    Metadata:
+      BuildMethod: nodejs18.x
+      SamResourceId: registerNGO
+  manageDonor:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: manageDonor
+      Handler: index.handler
+      FunctionName: manageDonor
+      Description: A lambda to handle donor.
+      Role:
+        Fn::GetAtt:
+        - lambdaExecutionRole
+        - Arn
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /manageDonor
+            Method: POST
+      Environment:
+        Variables:
+          JWT_SECRET_PARAM: /emp-backend/jwt-secret
+    Metadata:
+      BuildMethod: nodejs18.x
+      SamResourceId: manageDonor
+  manageLeads:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: manageLeads
+      Handler: index.handler
+      FunctionName: manageLeads
+      Description: A lambda to handle contact Leads.
+      Role:
+        Fn::GetAtt:
+        - lambdaExecutionRole
+        - Arn
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /manageLeads
+            Method: POST
+      Environment:
+        Variables:
+          JWT_SECRET_PARAM: /emp-backend/jwt-secret
+    Metadata:
+      BuildMethod: nodejs18.x
+      SamResourceId: manageLeads
+  registerUsers:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: registerUsers
+      Handler: index.handler
+      FunctionName: registerUsers
+      Description: A lambda to handle register users.
+      Role:
+        Fn::GetAtt:
+        - lambdaExecutionRole
+        - Arn
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /registerUsers
+            Method: POST
+      Environment:
+        Variables:
+          JWT_SECRET_PARAM: /emp-backend/jwt-secret
+    Metadata:
+      BuildMethod: nodejs18.x
+      SamResourceId: registerUsers
+  updateNGO:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: updateNGO
+      Handler: index.handler
+      FunctionName: updateNGO
+      Description: A lambda to updateNGO.
+      Role:
+        Fn::GetAtt:
+        - lambdaExecutionRole
+        - Arn
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /updateNGO
+            Method: POST
+      Environment:
+        Variables:
+          JWT_SECRET_PARAM: /emp-backend/jwt-secret
+    Metadata:
+      BuildMethod: nodejs18.x
+      SamResourceId: updateNGO
+  manageDonations:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: manageDonations
+      Handler: index.handler
+      FunctionName: manageDonations
+      Description: A lambda to add or update donations.
+      Role:
+        Fn::GetAtt:
+        - lambdaExecutionRole
+        - Arn
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /manageDonations
+            Method: POST
+      Environment:
+        Variables:
+          JWT_SECRET_PARAM: /emp-backend/jwt-secret
+    Metadata:
+      BuildMethod: nodejs18.x
+      SamResourceId: manageDonations
+  userSignIn:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: userSignIn
+      Handler: index.handler
+      FunctionName: userSignIn
+      Description: A lambda to handle user sign in.
+      Role:
+        Fn::GetAtt:
+        - lambdaExecutionRole
+        - Arn
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /userSignIn
+            Method: POST
+      Environment:
+        Variables:
+          JWT_SECRET_PARAM: /emp-backend/jwt-secret
+    Metadata:
+      BuildMethod: nodejs18.x
+      SamResourceId: userSignIn
+  manageSubscriptionPlan:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: manageSubscriptionPlan
+      Handler: index.handler
+      FunctionName: manageSubscriptionPlan
+      Description: A lambda to handle subscription Plan.
+      Role:
+        Fn::GetAtt:
+        - lambdaExecutionRole
+        - Arn
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /manageSubscriptionPlan
+            Method: POST
+      Environment:
+        Variables:
+          JWT_SECRET_PARAM: /emp-backend/jwt-secret
+    Metadata:
+      BuildMethod: nodejs18.x
+      SamResourceId: manageSubscriptionPlan
