@@ -52,19 +52,18 @@ exports.createDonation = async (parameter, receiptNumber) => {
 exports.updateDonation = async (parameter) => {
   const query = `
     UPDATE TB_DONATION 
-    SET AMOUNT = ?, BANK = ?, TYPE = ?, TRANSACTION_ID = ?, PURPOSE = ?, PROJECT = ?, DONATION_DATE = ?, NOTE = ?, UPDATED_AT = NOW()
+    SET DONOR_ID = ?, AMOUNT = ?, BANK = ?, TYPE = ?, PURPOSE = ?, PROJECT = ?, NOTE = ?, UPDATED_AT = NOW()
     WHERE DONATION_ID = ? AND NGO_ID = ?
   `;
 
   await sequelize.query(query, {
     replacements: [
+      parameter.donorID,
       parameter.amount,
       parameter.bank,
       parameter.type,
-      parameter.transactionID || null,
       parameter.purpose,
-      parameter.project || null,
-      parameter.donationDate,
+      parameter.project,
       parameter.note || null,
       parameter.donationID,
       parameter.ngoID,

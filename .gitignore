@@ -1,1 +1,12 @@
 node_modules
+# Jest test coverage & cache
+coverage/
+jest-cache/
+jest/
+
+# Jest config files
+jest.config.js
+jest.config.cjs
+jest.config.mjs
+jest.config.ts
+jest.config.json

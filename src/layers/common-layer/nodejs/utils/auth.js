@@ -44,7 +44,7 @@ exports.verifyToken = async (token) => {
     if (token.startsWith("Bearer ")) {
       token = token.slice(7).trim();
     }
-
+    console.info("Extracted Token:", token);
     const secret = await getJWTSecret();
     return jwt.verify(token, secret);
   } catch (error) {

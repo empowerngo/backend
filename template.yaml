@@ -170,42 +170,86 @@ Resources:
       BuildMethod: makefile
 
  
-  registerNGO:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: src/handlers/registerNGO
-      Handler: index.handler
-      FunctionName: registerNGO
-      Description: "A lambda to create NGO."
-      Role: !GetAtt lambdaExecutionRole.Arn
-      Events:
-        Api:
-          Type: Api
-          Properties:
-            Path: "/registerNGO"
-            Method: POST
-      Environment:
-        Variables:
-          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"                  
-      # Layers:
-      #  - !Ref CommonCodeLayer
-    Metadata:
-      BuildMethod: nodejs18.x
-
-  
+    
   manageDonor:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: src/handlers/manageDonor
       Handler: index.handler
       FunctionName: manageDonor
-      Description: "A lambda to handle donor."
+      Description: "A lambda to add donor."
       Role: !GetAtt lambdaExecutionRole.Arn
       Events:
         Api:
           Type: Api
           Properties:
             Path: "/manageDonor"
+            Method: POST
+      Environment:
+        Variables:
+          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"            
+      # Layers:
+      #  - !Ref CommonCodeLayer
+    Metadata:
+      BuildMethod: nodejs18.x
+
+  manageNGO:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/handlers/manageNGO
+      Handler: index.handler
+      FunctionName: manageNGO
+      Description: "A lambda to manage NGO (add/Update)"
+      Role: !GetAtt lambdaExecutionRole.Arn
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: "/manageNGO"
+            Method: POST
+      Environment:
+        Variables:
+          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"            
+      # Layers:
+      #  - !Ref CommonCodeLayer
+    Metadata:
+      BuildMethod: nodejs18.x
+
+  manageProject:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/handlers/manageProject
+      Handler: index.handler
+      FunctionName: manageProject
+      Description: "A lambda to manage NGO Project (add/Update)"
+      Role: !GetAtt lambdaExecutionRole.Arn
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: "/manageProject"
+            Method: POST
+      Environment:
+        Variables:
+          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"            
+      # Layers:
+      #  - !Ref CommonCodeLayer
+    Metadata:
+      BuildMethod: nodejs18.x
+
+  managePurpose:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/handlers/managePurpose
+      Handler: index.handler
+      FunctionName: managePurpose
+      Description: "A lambda to manage NGO managePurpose (add/Update)"
+      Role: !GetAtt lambdaExecutionRole.Arn
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: "/managePurpose"
             Method: POST
       Environment:
         Variables:
@@ -237,19 +281,19 @@ Resources:
     Metadata:
       BuildMethod: nodejs18.x
 
-  registerUsers:
+  manageUserRegistration:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: src/handlers/registerUsers
+      CodeUri: src/handlers/manageUserRegistration
       Handler: index.handler
-      FunctionName: registerUsers
+      FunctionName: manageUserRegistration
       Description: "A lambda to handle register users."
       Role: !GetAtt lambdaExecutionRole.Arn
       Events:
         Api:
           Type: Api
           Properties:
-            Path: "/registerUsers"
+            Path: "/manageUserRegistration"
             Method: POST
       Environment:
         Variables:
@@ -259,19 +303,41 @@ Resources:
     Metadata:
       BuildMethod: nodejs18.x
 
-  updateNGO:
+  retrieveUsersInfo:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: src/handlers/updateNGO
+      CodeUri: src/handlers/retrieveUsersInfo
       Handler: index.handler
-      FunctionName: updateNGO
-      Description: "A lambda to updateNGO."
+      FunctionName: retrieveUsersInfo
+      Description: "A lambda to fetch users lists and details."
       Role: !GetAtt lambdaExecutionRole.Arn
       Events:
         Api:
           Type: Api
           Properties:
-            Path: "/updateNGO"
+            Path: "/retrieveUsersInfo"
+            Method: POST
+      Environment:
+        Variables:
+          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"            
+      # Layers:
+      #  - !Ref CommonCodeLayer
+    Metadata:
+      BuildMethod: nodejs18.x
+
+  retrieveNGOInfo:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/handlers/retrieveNGOInfo
+      Handler: index.handler
+      FunctionName: retrieveNGOInfo
+      Description: "A lambda to fetch NGO list and info."
+      Role: !GetAtt lambdaExecutionRole.Arn
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: "/retrieveNGOInfo"
             Method: POST
       Environment:
         Variables:
@@ -348,4 +414,27 @@ Resources:
       # Layers:
       #  - !Ref CommonCodeLayer
     Metadata:
-      BuildMethod: nodejs18.x  
+      BuildMethod: nodejs18.x
+
+  retrieveReceiptData:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/handlers/retrieveReceiptData
+      Handler: index.handler
+      FunctionName: retrieveReceiptData
+      Description: "A lambda to handle subscription Plan."
+      Role: !GetAtt lambdaExecutionRole.Arn
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: "/retrieveReceiptData"
+            Method: POST
+      Environment:
+        Variables:
+          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"            
+      # Layers:
+      #  - !Ref CommonCodeLayer
+    Metadata:
+      BuildMethod: nodejs18.x 
+

@@ -94,36 +94,13 @@ Resources:
     Metadata:
       BuildMethod: makefile
       SamResourceId: CommonLayer
-  registerNGO:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: registerNGO
-      Handler: index.handler
-      FunctionName: registerNGO
-      Description: A lambda to create NGO.
-      Role:
-        Fn::GetAtt:
-        - lambdaExecutionRole
-        - Arn
-      Events:
-        Api:
-          Type: Api
-          Properties:
-            Path: /registerNGO
-            Method: POST
-      Environment:
-        Variables:
-          JWT_SECRET_PARAM: /emp-backend/jwt-secret
-    Metadata:
-      BuildMethod: nodejs18.x
-      SamResourceId: registerNGO
   manageDonor:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: manageDonor
       Handler: index.handler
       FunctionName: manageDonor
-      Description: A lambda to handle donor.
+      Description: A lambda to add donor.
       Role:
         Fn::GetAtt:
         - lambdaExecutionRole
@@ -140,6 +117,75 @@ Resources:
     Metadata:
       BuildMethod: nodejs18.x
       SamResourceId: manageDonor
+  manageNGO:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: manageNGO
+      Handler: index.handler
+      FunctionName: manageNGO
+      Description: A lambda to manage NGO (add/Update)
+      Role:
+        Fn::GetAtt:
+        - lambdaExecutionRole
+        - Arn
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /manageNGO
+            Method: POST
+      Environment:
+        Variables:
+          JWT_SECRET_PARAM: /emp-backend/jwt-secret
+    Metadata:
+      BuildMethod: nodejs18.x
+      SamResourceId: manageNGO
+  manageProject:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: manageProject
+      Handler: index.handler
+      FunctionName: manageProject
+      Description: A lambda to manage NGO Project (add/Update)
+      Role:
+        Fn::GetAtt:
+        - lambdaExecutionRole
+        - Arn
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /manageProject
+            Method: POST
+      Environment:
+        Variables:
+          JWT_SECRET_PARAM: /emp-backend/jwt-secret
+    Metadata:
+      BuildMethod: nodejs18.x
+      SamResourceId: manageProject
+  managePurpose:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: managePurpose
+      Handler: index.handler
+      FunctionName: managePurpose
+      Description: A lambda to manage NGO managePurpose (add/Update)
+      Role:
+        Fn::GetAtt:
+        - lambdaExecutionRole
+        - Arn
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /managePurpose
+            Method: POST
+      Environment:
+        Variables:
+          JWT_SECRET_PARAM: /emp-backend/jwt-secret
+    Metadata:
+      BuildMethod: nodejs18.x
+      SamResourceId: managePurpose
   manageLeads:
     Type: AWS::Serverless::Function
     Properties:
@@ -163,12 +209,12 @@ Resources:
     Metadata:
       BuildMethod: nodejs18.x
       SamResourceId: manageLeads
-  registerUsers:
+  manageUserRegistration:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: registerUsers
+      CodeUri: manageUserRegistration
       Handler: index.handler
-      FunctionName: registerUsers
+      FunctionName: manageUserRegistration
       Description: A lambda to handle register users.
       Role:
         Fn::GetAtt:
@@ -178,21 +224,21 @@ Resources:
         Api:
           Type: Api
           Properties:
-            Path: /registerUsers
+            Path: /manageUserRegistration
             Method: POST
       Environment:
         Variables:
           JWT_SECRET_PARAM: /emp-backend/jwt-secret
     Metadata:
       BuildMethod: nodejs18.x
-      SamResourceId: registerUsers
-  updateNGO:
+      SamResourceId: manageUserRegistration
+  retrieveUsersInfo:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: updateNGO
+      CodeUri: retrieveUsersInfo
       Handler: index.handler
-      FunctionName: updateNGO
-      Description: A lambda to updateNGO.
+      FunctionName: retrieveUsersInfo
+      Description: A lambda to fetch users lists and details.
       Role:
         Fn::GetAtt:
         - lambdaExecutionRole
@@ -201,14 +247,37 @@ Resources:
         Api:
           Type: Api
           Properties:
-            Path: /updateNGO
+            Path: /retrieveUsersInfo
             Method: POST
       Environment:
         Variables:
           JWT_SECRET_PARAM: /emp-backend/jwt-secret
     Metadata:
       BuildMethod: nodejs18.x
-      SamResourceId: updateNGO
+      SamResourceId: retrieveUsersInfo
+  retrieveNGOInfo:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: retrieveNGOInfo
+      Handler: index.handler
+      FunctionName: retrieveNGOInfo
+      Description: A lambda to fetch NGO list and info.
+      Role:
+        Fn::GetAtt:
+        - lambdaExecutionRole
+        - Arn
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /retrieveNGOInfo
+            Method: POST
+      Environment:
+        Variables:
+          JWT_SECRET_PARAM: /emp-backend/jwt-secret
+    Metadata:
+      BuildMethod: nodejs18.x
+      SamResourceId: retrieveNGOInfo
   manageDonations:
     Type: AWS::Serverless::Function
     Properties:
@@ -278,3 +347,26 @@ Resources:
     Metadata:
       BuildMethod: nodejs18.x
       SamResourceId: manageSubscriptionPlan
+  retrieveReceiptData:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: retrieveReceiptData
+      Handler: index.handler
+      FunctionName: retrieveReceiptData
+      Description: A lambda to handle subscription Plan.
+      Role:
+        Fn::GetAtt:
+        - lambdaExecutionRole
+        - Arn
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /retrieveReceiptData
+            Method: POST
+      Environment:
+        Variables:
+          JWT_SECRET_PARAM: /emp-backend/jwt-secret
+    Metadata:
+      BuildMethod: nodejs18.x
+      SamResourceId: retrieveReceiptData

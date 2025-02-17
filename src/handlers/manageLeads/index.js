@@ -7,8 +7,15 @@ exports.handler = async (event, context) => {
   try {
 
     // Authenticate request
-    const authResponse = await verifyToken(event);
-    if (!authResponse.success) return authResponse;
+    const authResponse = await verifyToken(event.headers?.Authorization || event.headers?.authorization);
+
+    if (!authResponse) {
+      return getResponseObject({
+        status: false,
+        statusCode: HTTP_CODE.UNAUTHORIZED,
+        message: "Invalid or missing token",
+      });
+    }
     
     const parameter = JSON.parse(event.body);
 

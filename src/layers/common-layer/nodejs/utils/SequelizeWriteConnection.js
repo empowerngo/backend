@@ -20,7 +20,7 @@ const sequelize = new Sequelize( database, user, password, {
       
     },
     pool: {
-        max: parseInt(process.env.LIMIT),
+        max: parseInt(process.env.LIMIT) || 10,
         min: 0,
         idle: 0,
         acquire: 10000,

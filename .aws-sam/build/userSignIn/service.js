@@ -7,12 +7,12 @@ const ssm = new AWS.SSM();
 // Authenticate user
 exports.authenticateUser = async (email, password) => {
   const query = `
-    SELECT U.USER_ID, U.FULL_NAME, U.EMAIL, U.CONTACT_NUMBER, U.PASSWORD_HASH, U.ROLE_CODE, 
+    SELECT U.USER_ID, U.FNAME, U.LNAME, U.EMAIL, U.CONTACT_NUMBER, U.PASSWORD_HASH, U.ROLE_CODE, 
            N.NGO_ID, N.NGO_NAME, N.STATUS AS NGO_STATUS
     FROM TB_USER U
     LEFT JOIN TB_NGO_USER_MAPPING M ON U.USER_ID = M.USER_ID
     LEFT JOIN TB_NGO N ON M.NGO_ID = N.NGO_ID
-    WHERE U.EMAIL = ?
+    WHERE U.EMAIL = ?;
   `;
   
   const result = await sequelize.query(query, {

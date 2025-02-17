@@ -6,12 +6,19 @@ exports.handler = async (event, context) => {
   try {
 
     // Authenticate request
-    const authResponse = await verifyToken(event);
-    if (!authResponse.success) return authResponse;
+    const authResponse = await verifyToken(event.headers?.Authorization || event.headers?.authorization);
+
+    if (!authResponse) {
+      return getResponseObject({
+        status: false,
+        statusCode: HTTP_CODE.UNAUTHORIZED,
+        message: "Invalid or missing token",
+      });
+    }
 
     // Extract user details from the token
-    const user = authResponse.user;
-    if (![1,2, 3].includes(user.role)) {
+    const user = authResponse;
+    if (![2, 3].includes(user.role)) {
       return getResponseObject({
         status: false,
         statusCode: HTTP_CODE.FORBIDDEN,
@@ -32,18 +39,13 @@ exports.handler = async (event, context) => {
     }
 
     // Check role-based permissions
-    if (parameter.reqType === "s" && ![1, 2, 3].includes(parameter.roleCode)) {
+   
+    if (parameter.reqType === "u" && ![2].includes(user.role)) {
+      console.log("user role",user.role );
       return getResponseObject({
         status: false,
         statusCode: HTTP_CODE.FORBIDDEN,
-        message: "Only NGO-Admin or NGO-Staff can manage donations.",
-      });
-    }
-    if (parameter.reqType === "u" && ![1, 2].includes(parameter.roleCode)) {
-      return getResponseObject({
-        status: false,
-        statusCode: HTTP_CODE.FORBIDDEN,
-        message: "Only NGO-Admin or Super admin can manage donations",
+        message: "Only NGO-Admin can update donations",
       });
     }
 
@@ -60,7 +62,7 @@ exports.handler = async (event, context) => {
     }
 
     // Update donation
-    if (parameter.reqType === "u") {
+    if (parameter.reqType === "u" && user.role == 2) {
       await service.updateDonation(parameter);
       return getResponseObject({
         status: true,
