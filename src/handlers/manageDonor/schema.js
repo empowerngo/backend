@@ -8,6 +8,7 @@ const schema = Joi.object().keys({
         then: Joi.required(),
         otherwise: Joi.optional()
     }),
+    donorMName: Joi.string().optional().allow(null, ""),
     donorFName: Joi.string().when("reqType", {
         is: "s",
         then: Joi.required(),

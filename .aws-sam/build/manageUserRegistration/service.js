@@ -31,28 +31,6 @@ exports.getExistingCA = async (userContact) => {
   return result.length > 0 ? result[0].USER_ID : null;
 };
 
-// // Create a new user
-// exports.createUser = async (parameter) => {
-//   const hashedPassword = await bcrypt.hash(parameter.password, 10);
-//   console.log("hashedPass - ", hashedPassword);
-//   const query = `
-//     INSERT INTO TB_USER (FNAME, LNAME, EMAIL, CONTACT_NUMBER, PASSWORD_HASH, ROLE_CODE, CREATED_BY)
-//     VALUES (?, ?, ?, ?, ?, ?, ?)
-//   `;
-//   const result = await sequelize.query(query, {
-//     replacements: [
-//       parameter.firstName,
-//       parameter.lastName,
-//       parameter.email,
-//       parameter.contactNumber,
-//       hashedPassword,
-//       parameter.roleCode,
-//       parameter.createdBy,
-//     ],
-//     type: QueryTypes.INSERT,
-//   });
-//   return result[0]; // Returns the new user ID
-// };
 
 // ✅ Create a new user (USER_STATUS set to 'ACTIVE' by default)
 exports.createUser = async (parameter) => {
@@ -69,7 +47,7 @@ exports.createUser = async (parameter) => {
       parameter.contactNumber,
       hashedPassword,
       parameter.roleCode,
-      parameter.createdBy,
+      parameter.userID,
     ],
     type: QueryTypes.INSERT,
   });

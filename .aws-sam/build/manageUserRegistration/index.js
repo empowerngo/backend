@@ -30,11 +30,17 @@ exports.handler = async (event, context) => {
         message: validationSchema.error.details[0].message,
       });
     }
+    console.log("user.role = ", user.role);
+    console.log("parameter.roleCode = ", parameter.roleCode);
+    console.log("typeof user.role =", typeof user.role, "| user.role =", user.role);
+console.log("typeof parameter.roleCode =", typeof parameter.roleCode, "| parameter.roleCode =", parameter.roleCode);
+console.log("[3, 4].includes(parameter.roleCode) =", [3, 4].includes(parameter.roleCode));
 
     if (parameter.reqType === "s") {
       // Role-based restrictions for user creation
-      if ((user.role === 1 && ![1, 2].includes(parameter.roleCode)) ||
-        (user.role === 2 && ![3, 4].includes(parameter.roleCode))) {
+      if (![1, 2].includes(Number(user.role)))
+        {
+          console.log("Inside authRejection");
         return getResponseObject({ status: false, statusCode: HTTP_CODE.FORBIDDEN, message: "Unauthorized action." });
       }
 
@@ -64,8 +70,10 @@ exports.handler = async (event, context) => {
     }
 
     if (parameter.reqType === "u") {
-      if ((user.role === 1 && ![1, 2].includes(parameter.roleCode)) ||
-        (user.role === 2 && ![3, 4].includes(parameter.roleCode))) {
+      // Role-based restrictions for user creation
+      if ((user.role != null && parameter.roleCode != null) && 
+      ((Number(user.role) === 1 && ![1, 2].includes(Number(parameter.roleCode))) ||
+       (Number(user.role) === 2 && ![3, 4].includes(Number(parameter.roleCode))))) {
         return getResponseObject({ status: false, statusCode: HTTP_CODE.FORBIDDEN, message: "Unauthorized action." });
       }
 

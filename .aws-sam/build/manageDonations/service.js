@@ -71,3 +71,20 @@ exports.updateDonation = async (parameter) => {
     type: QueryTypes.UPDATE,
   });
 };
+
+// Update donation record
+exports.updateStatement = async (statementID,ngoID ) => {
+  const query = `
+    UPDATE TB_STATEMENT 
+    SET STATUS = "HANDLED", UPD_DATE = NOW()
+    WHERE ID = ? AND NGO_ID = ?
+  `;
+
+  await sequelize.query(query, {
+    replacements: [
+      statementID,
+      ngoID,      
+    ],
+    type: QueryTypes.UPDATE,
+  });
+};

@@ -394,19 +394,64 @@ Resources:
     Metadata:
       BuildMethod: nodejs18.x
 
-  manageSubscriptionPlan:
+  
+  # retrieveReceiptData:
+  #   Type: AWS::Serverless::Function
+  #   Properties:
+  #     CodeUri: src/handlers/retrieveReceiptData
+  #     Handler: index.handler
+  #     FunctionName: retrieveReceiptData
+  #     Description: "A lambda to fetch Receipt Data."
+  #     Role: !GetAtt lambdaExecutionRole.Arn
+  #     Events:
+  #       Api:
+  #         Type: Api
+  #         Properties:
+  #           Path: "/retrieveReceiptData"
+  #           Method: POST
+  #     Environment:
+  #       Variables:
+  #         JWT_SECRET_PARAM: "/emp-backend/jwt-secret"            
+  #     # Layers:
+  #     #  - !Ref CommonCodeLayer
+  #   Metadata:
+  #     BuildMethod: nodejs18.x
+
+  manageSubsPackage:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: src/handlers/manageSubscriptionPlan
+      CodeUri: src/handlers/manageSubsPackage
       Handler: index.handler
-      FunctionName: manageSubscriptionPlan
+      FunctionName: manageSubsPackage
       Description: "A lambda to handle subscription Plan."
       Role: !GetAtt lambdaExecutionRole.Arn
       Events:
         Api:
           Type: Api
           Properties:
-            Path: "/manageSubscriptionPlan"
+            Path: "/manageSubsPackage"
+            Method: POST
+      Environment:
+        Variables:
+          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"            
+      # Layers:
+      #  - !Ref CommonCodeLayer
+    Metadata:
+      BuildMethod: nodejs18.x 
+
+  retrieveSubsPackages:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/handlers/retrieveSubsPackages
+      Handler: index.handler
+      FunctionName: retrieveSubsPackages
+      Description: "A lambda to handle subscription Plan."
+      Role: !GetAtt lambdaExecutionRole.Arn
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: "/retrieveSubsPackages"
             Method: POST
       Environment:
         Variables:
@@ -416,19 +461,19 @@ Resources:
     Metadata:
       BuildMethod: nodejs18.x
 
-  retrieveReceiptData:
+  retrieveDonorInfo:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: src/handlers/retrieveReceiptData
+      CodeUri: src/handlers/retrieveDonorInfo
       Handler: index.handler
-      FunctionName: retrieveReceiptData
+      FunctionName: retrieveDonorInfo
       Description: "A lambda to handle subscription Plan."
       Role: !GetAtt lambdaExecutionRole.Arn
       Events:
         Api:
           Type: Api
           Properties:
-            Path: "/retrieveReceiptData"
+            Path: "/retrieveDonorInfo"
             Method: POST
       Environment:
         Variables:
@@ -436,5 +481,95 @@ Resources:
       # Layers:
       #  - !Ref CommonCodeLayer
     Metadata:
-      BuildMethod: nodejs18.x 
+      BuildMethod: nodejs18.x
+
+  importStatement:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/handlers/importStatement
+      Handler: index.handler
+      FunctionName: importStatement
+      Description: "A lambda to handle subscription Plan."
+      Role: !GetAtt lambdaExecutionRole.Arn
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: "/importStatement"
+            Method: POST
+      Environment:
+        Variables:
+          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"            
+      # Layers:
+      #  - !Ref CommonCodeLayer
+    Metadata:
+      BuildMethod: nodejs18.x
+
+  retrieveStatementData:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/handlers/retrieveStatementData
+      Handler: index.handler
+      FunctionName: retrieveStatementData
+      Description: "A lambda to handle subscription Plan."
+      Role: !GetAtt lambdaExecutionRole.Arn
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: "/retrieveStatementData"
+            Method: POST
+      Environment:
+        Variables:
+          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"            
+      # Layers:
+      #  - !Ref CommonCodeLayer
+    Metadata:
+      BuildMethod: nodejs18.x
+
+  retrieveDonations:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/handlers/retrieveDonations
+      Handler: index.handler
+      FunctionName: retrieveDonations
+      Description: "A lambda to fetch Donations records."
+      Role: !GetAtt lambdaExecutionRole.Arn
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: "/retrieveDonations"
+            Method: POST
+      Environment:
+        Variables:
+          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"            
+      # Layers:
+      #  - !Ref CommonCodeLayer
+    Metadata:
+      BuildMethod: nodejs18.x
+
+  sendEmail:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/handlers/sendEmail
+      Handler: index.handler
+      FunctionName: sendEmail
+      Description: "A lambda to fetch Donations records."
+      Role: !GetAtt lambdaExecutionRole.Arn
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: "/sendEmail"
+            Method: POST
+      Environment:
+        Variables:
+          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"
+          SMTP_USER: "support@empowerngo.com"
+          SMTP_PASS: "EmpTech#25"            
+      # Layers:
+      #  - !Ref CommonCodeLayer
+    Metadata:
+      BuildMethod: nodejs18.x
 

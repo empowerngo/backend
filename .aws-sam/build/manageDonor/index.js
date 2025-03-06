@@ -70,6 +70,12 @@ exports.handler = async (event, context) => {
                 console.info(`Donor ID: ${donorID} mapped to NGO ID: ${parameter.donorNGOID}`);
             } else {
                 console.info(`Donor ID: ${donorID} is already mapped to NGO ID: ${parameter.donorNGOID}, skipping mapping.`);
+                return getResponseObject({
+                    status: true,
+                    statusCode: HTTP_CODE.CREATED,
+                    message: "Donor is already present so not added.",
+                    payload: { donorID },
+                });
             }
 
             return getResponseObject({

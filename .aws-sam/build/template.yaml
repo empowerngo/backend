@@ -324,12 +324,12 @@ Resources:
     Metadata:
       BuildMethod: nodejs18.x
       SamResourceId: userSignIn
-  manageSubscriptionPlan:
+  manageSubsPackage:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: manageSubscriptionPlan
+      CodeUri: manageSubsPackage
       Handler: index.handler
-      FunctionName: manageSubscriptionPlan
+      FunctionName: manageSubsPackage
       Description: A lambda to handle subscription Plan.
       Role:
         Fn::GetAtt:
@@ -339,20 +339,20 @@ Resources:
         Api:
           Type: Api
           Properties:
-            Path: /manageSubscriptionPlan
+            Path: /manageSubsPackage
             Method: POST
       Environment:
         Variables:
           JWT_SECRET_PARAM: /emp-backend/jwt-secret
     Metadata:
       BuildMethod: nodejs18.x
-      SamResourceId: manageSubscriptionPlan
-  retrieveReceiptData:
+      SamResourceId: manageSubsPackage
+  retrieveSubsPackages:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: retrieveReceiptData
+      CodeUri: retrieveSubsPackages
       Handler: index.handler
-      FunctionName: retrieveReceiptData
+      FunctionName: retrieveSubsPackages
       Description: A lambda to handle subscription Plan.
       Role:
         Fn::GetAtt:
@@ -362,11 +362,128 @@ Resources:
         Api:
           Type: Api
           Properties:
-            Path: /retrieveReceiptData
+            Path: /retrieveSubsPackages
             Method: POST
       Environment:
         Variables:
           JWT_SECRET_PARAM: /emp-backend/jwt-secret
     Metadata:
       BuildMethod: nodejs18.x
-      SamResourceId: retrieveReceiptData
+      SamResourceId: retrieveSubsPackages
+  retrieveDonorInfo:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: retrieveDonorInfo
+      Handler: index.handler
+      FunctionName: retrieveDonorInfo
+      Description: A lambda to handle subscription Plan.
+      Role:
+        Fn::GetAtt:
+        - lambdaExecutionRole
+        - Arn
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /retrieveDonorInfo
+            Method: POST
+      Environment:
+        Variables:
+          JWT_SECRET_PARAM: /emp-backend/jwt-secret
+    Metadata:
+      BuildMethod: nodejs18.x
+      SamResourceId: retrieveDonorInfo
+  importStatement:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: importStatement
+      Handler: index.handler
+      FunctionName: importStatement
+      Description: A lambda to handle subscription Plan.
+      Role:
+        Fn::GetAtt:
+        - lambdaExecutionRole
+        - Arn
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /importStatement
+            Method: POST
+      Environment:
+        Variables:
+          JWT_SECRET_PARAM: /emp-backend/jwt-secret
+    Metadata:
+      BuildMethod: nodejs18.x
+      SamResourceId: importStatement
+  retrieveStatementData:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: retrieveStatementData
+      Handler: index.handler
+      FunctionName: retrieveStatementData
+      Description: A lambda to handle subscription Plan.
+      Role:
+        Fn::GetAtt:
+        - lambdaExecutionRole
+        - Arn
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /retrieveStatementData
+            Method: POST
+      Environment:
+        Variables:
+          JWT_SECRET_PARAM: /emp-backend/jwt-secret
+    Metadata:
+      BuildMethod: nodejs18.x
+      SamResourceId: retrieveStatementData
+  retrieveDonations:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: retrieveDonations
+      Handler: index.handler
+      FunctionName: retrieveDonations
+      Description: A lambda to fetch Donations records.
+      Role:
+        Fn::GetAtt:
+        - lambdaExecutionRole
+        - Arn
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /retrieveDonations
+            Method: POST
+      Environment:
+        Variables:
+          JWT_SECRET_PARAM: /emp-backend/jwt-secret
+    Metadata:
+      BuildMethod: nodejs18.x
+      SamResourceId: retrieveDonations
+  sendEmail:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: sendEmail
+      Handler: index.handler
+      FunctionName: sendEmail
+      Description: A lambda to fetch Donations records.
+      Role:
+        Fn::GetAtt:
+        - lambdaExecutionRole
+        - Arn
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /sendEmail
+            Method: POST
+      Environment:
+        Variables:
+          JWT_SECRET_PARAM: /emp-backend/jwt-secret
+          SMTP_USER: support@empowerngo.com
+          SMTP_PASS: EmpTech#25
+    Metadata:
+      BuildMethod: nodejs18.x
+      SamResourceId: sendEmail

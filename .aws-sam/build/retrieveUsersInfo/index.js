@@ -28,11 +28,11 @@ exports.handler = async (event, context) => {
 
     // Extract user details from the token
     const user = authResponse;
-    if (user.role !== 1) {
+    if (![1, 2].includes(user.role)) {
       return getResponseObject({
         status: false,
         statusCode: HTTP_CODE.FORBIDDEN,
-        message: "Only Super Admin can retrieve user information.",
+        message: "Only Super Admin and NGO admin can retrieve user information.",
       });
     }
 
@@ -47,13 +47,25 @@ exports.handler = async (event, context) => {
     }
 
     if (parameter.reqType === "list") {
-      const usersList = await service.fetchUsersList();
-      return getResponseObject({
-        status: true,
-        statusCode: HTTP_CODE.SUCCESS,
-        message: "User list retrieved successfully.",
-        payload: usersList,
-      });
+
+      if (user.role == 2) {
+        const usersList = await service.fetchNGOUserList(user.ngoID);
+        return getResponseObject({
+          status: true,
+          statusCode: HTTP_CODE.SUCCESS,
+          message: "User list retrieved successfully.",
+          payload: usersList,
+        });
+      } else {
+        const usersList = await service.fetchAdminUsersList();
+        return getResponseObject({
+          status: true,
+          statusCode: HTTP_CODE.SUCCESS,
+          message: "User list retrieved successfully.",
+          payload: usersList,
+        });
+      }
+
     } else if (parameter.reqType === "info") {
       const userInfo = await service.fetchUserInfo(parameter.userID);
       if (!userInfo) {

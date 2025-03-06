@@ -53,6 +53,10 @@ exports.handler = async (event, context) => {
     if (parameter.reqType === "s") {
       const receiptNumber = await service.generateReceiptNumber(parameter.ngoID);
       await service.createDonation(parameter, receiptNumber);
+
+      if (parameter.statementID){
+        await service.createDonation(parameter.statementID, parameter.ngoID);
+      }
       return getResponseObject({
         status: true,
         statusCode: HTTP_CODE.CREATED,

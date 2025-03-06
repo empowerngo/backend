@@ -29,12 +29,26 @@ exports.handler = async (event, context) => {
     // Generate JWT token
     const token = await service.generateToken(user);
 
-    return getResponseObject({
+     // Prepare response payload
+     const payload = { token, user };
+     if (user.PROJECTS) {
+       payload.PROJECTS = user.PROJECTS;
+     }
+
+     return getResponseObject({
       status: true,
       statusCode: HTTP_CODE.SUCCESS,
       message: "Login successful.",
-      payload: { token, user },
+      payload: payload,
     });
+
+
+    // return getResponseObject({
+    //   status: true,
+    //   statusCode: HTTP_CODE.SUCCESS,
+    //   message: "Login successful.",
+    //   payload: { token, user },
+    // });
 
   } catch (error) {
     console.error("Error in login handler: ", error);

@@ -21,6 +21,7 @@ const schema = Joi.object().keys({
     otherwise: Joi.optional(),
   }),
   note: Joi.string().optional().allow(""),
+  statementID: Joi.string().optional().allow(""),
 });
 
 module.exports = schema;
