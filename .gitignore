@@ -1,4 +1,6 @@
 node_modules
+.aws-sam
+__tests__
 # Jest test coverage & cache
 coverage/
 jest-cache/
