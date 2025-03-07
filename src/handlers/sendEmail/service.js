@@ -1,4 +1,4 @@
-const nodemailer = require("/opt/nodejs/node_modules/nodemailer");
+const nodemailer = require("nodemailer");
 
 exports.sendEmail = async (donorDetails, receiptAttachment) => {
   try {
@@ -8,8 +8,8 @@ exports.sendEmail = async (donorDetails, receiptAttachment) => {
       secure: true,
       auth: {
         user: "support@empowerngo.com",
-        pass: "EmpTech#25"
-      }
+        pass: "EmpTech#25",
+      },
     });
 
     const {
@@ -18,16 +18,13 @@ exports.sendEmail = async (donorDetails, receiptAttachment) => {
       donorEmail,
       ngoName,
       contactPerson,
-      ngoContactNo
+      ngoContactNo,
     } = donorDetails;
 
-    const pdfFilename = receiptAttachment.filename;
-    const pdfContentType = receiptAttachment.contentType;
-    const pdfBase64Content = receiptAttachment.content;
-    const pdfBuffer = Buffer.from(pdfBase64Content, "base64");
+    const pdfBuffer = Buffer.from(receiptAttachment.content, "base64");
 
     const mailOptions = {
-      from: `support@empowerngo.com`,
+      from: `"${ngoName}" <support@empowerngo.com>`,
       to: donorEmail,
       subject: `Acknowledgment of Your Generous Contribution & 80G Receipt - ${ngoName}`,
       text: `Dear ${donorFName} ${donorLName} ji,\n\nGreetings!\n\nI take this opportunity to express our sincere gratitude for your kind contribution. Your support not only helps us to sustain but also motivates us to continue working. I am sending a soft copy of the 80G receipt as an attachment with this email. Thank you for being such an AWESOME support.\n\nRegards,\n${contactPerson}\n${ngoName}\n${ngoContactNo}`,
@@ -39,21 +36,19 @@ exports.sendEmail = async (donorDetails, receiptAttachment) => {
       `,
       attachments: [
         {
-          filename: pdfFilename,
+          filename: receiptAttachment.filename,
           content: pdfBuffer,
-          contentType: pdfContentType,
-          encoding: "base64"
-        }
-      ]
+          contentType: receiptAttachment.contentType,
+        },
+      ],
     };
 
     const info = await transporter.sendMail(mailOptions);
+    console.log("Email sent successfully:", info.messageId);
 
-    // console.log("Email sent successfully:", info.messageId);
-
-    return info; // Email sent successfully
+    return info;
   } catch (error) {
-    console.error("Error sending email:", error);
-    return false; // Email sending failed due to an error
+    console.error("Error sending email:", error.message || error);
+    return false; 
   }
 };
