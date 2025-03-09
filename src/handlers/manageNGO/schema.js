@@ -92,6 +92,11 @@ const schema = Joi.object({
     is: "s",
     then: Joi.required(),
     otherwise: Joi.optional(),
+  }),
+  ngoSealURL: Joi.string().optional().uri().when("reqType", {
+    is: "s",
+    then: Joi.required(),
+    otherwise: Joi.optional(),
   })
 });
 

@@ -33,6 +33,7 @@ FROM TB_NGO;
     ngoRegNumber: ngo.NGO_REG_NUMBER,
     logoURL: ngo.LOGO_URL,
     signatureURL: ngo.SIGNATURE_URL,
+    ngoSealURL: ngo.SEAL_URL,
     authorizedPerson: ngo.AUTHORIZED_PERSON,
     createdAt: ngo.CREATED_AT,
     updatedAt: ngo.UPDATED_AT
@@ -79,6 +80,7 @@ exports.fetchNGOInfo = async ngoID => {
     ngoRegNumber: ngo.NGO_REG_NUMBER,
     logoURL: ngo.LOGO_URL,
     signatureURL: ngo.SIGNATURE_URL,
+    ngoSealURL: ngo.SEAL_URL,
     authorizedPerson: ngo.AUTHORIZED_PERSON,
     createdAt: ngo.CREATED_AT,
     updatedAt: ngo.UPDATED_AT
