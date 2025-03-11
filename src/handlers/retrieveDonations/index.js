@@ -16,14 +16,14 @@ exports.handler = async (event) => {
     }
 
     // Authenticate request
-    const authResponse = await verifyToken(event.headers.Authorization);
-    if (!authResponse || authResponse.role !== 2) {
-      return getResponseObject({
-        status: false,
-        statusCode: HTTP_CODE.FORBIDDEN,
-        message: "Only admins can retrieve donations data.",
-      });
-    }
+    // const authResponse = await verifyToken(event.headers.Authorization);
+    // if (!authResponse || authResponse.role !== 2) {
+    //   return getResponseObject({
+    //     status: false,
+    //     statusCode: HTTP_CODE.FORBIDDEN,
+    //     message: "Only admins can retrieve donations data.",
+    //   });
+    // }
 
     // Parse request body
     const parameter = JSON.parse(event.body);
