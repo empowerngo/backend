@@ -10,27 +10,34 @@ const schema = Joi.object({
   planID: Joi.number().when("reqType", {
     is: "u",
     then: Joi.required(),
-    otherwise: Joi.optional(),
+    otherwise: Joi.optional()
   }),
   planName: Joi.string().when("reqType", {
     is: "s",
     then: Joi.required(),
-    otherwise: Joi.optional(),
+    otherwise: Joi.optional()
   }),
   planPrice: Joi.number().positive().when("reqType", {
     is: "s",
     then: Joi.required(),
-    otherwise: Joi.optional(),
+    otherwise: Joi.optional()
   }),
-  numberOfUsers: Joi.number().min(1).required(),
-  numberOfDonors: Joi.number().min(0).required(),
-  numberOfDonations: Joi.number().min(0).required(),
-  form10BEReport: Joi.boolean().default(false),
-  status: Joi.string().valid("ACTIVE", "INACTIVE").when("reqType", {
+  planValidity: Joi.number().positive().when("reqType", {
+    is: "s",
+    then: Joi.required(),
+    otherwise: Joi.optional()
+  }),
+  planStatus: Joi.string().valid("ACTIVE", "INACTIVE").when("reqType", {
     is: "u",
     then: Joi.required(),
-    otherwise: Joi.optional(),
+    otherwise: Joi.optional()
   }),
+  numberOfUsers: Joi.number().min(1).required(),
+  numberOfProjects: Joi.number().min(0).required(),
+  numberOfDonations: Joi.number().min(0).required(),
+  form10BdData: Joi.boolean().default(false),
+  form10BEMail: Joi.boolean().default(false),
+  caAccess: Joi.boolean().default(false)
 });
 
 module.exports = schema;

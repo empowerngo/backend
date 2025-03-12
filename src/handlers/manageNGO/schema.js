@@ -97,7 +97,12 @@ const schema = Joi.object({
     is: "s",
     then: Joi.required(),
     otherwise: Joi.optional(),
-  })
+  }),
+  planID: Joi.string().when("reqType", {
+    is: "s",
+    then: Joi.required(),
+    otherwise: Joi.optional(),
+  }),
 });
 
 module.exports = schema;

@@ -1,4 +1,7 @@
-const { sequelize, QueryTypes } = require("/opt/nodejs/utils/SequelizeWriteConnection");
+const {
+  sequelize,
+  QueryTypes
+} = require("/opt/nodejs/utils/SequelizeWriteConnection");
 
 // Fetch all subscription plans
 exports.fetchAllPlans = async () => {
@@ -9,18 +12,26 @@ exports.fetchAllPlans = async () => {
     planID: plan.PLAN_ID,
     planName: plan.PLAN_NAME,
     planPrice: plan.PLAN_PRICE,
+    planValidity: plan.VALIDITY,
+    planStatus: plan.PLAN_STATUS,
     numberOfUsers: plan.NUMBER_OF_USERS,
-    numberOfDonors: plan.NUMBER_OF_DONORS,
     numberOfDonations: plan.NUMBER_OF_DONATIONS,
-    form10BEReport: plan.FORM_10BE_REPORT,
-    status: plan.STATUS,
+    numberOfProjects: plan.NO_OF_PROJECTS,
+    form10BdData: plan.FORM_10BD_DATA,
+    form10BEMail: plan.FORM_10BE_MAIL,
+    caAccess: plan.CA_ACCESS,
+    createDate: plan.CREATED_AT,
+    updateDate: plan.UPDATED_AT
   }));
 };
 
 // Fetch a subscription plan by ID
-exports.fetchPlanById = async (planID) => {
+exports.fetchPlanById = async planID => {
   const query = `SELECT * FROM TB_SUBS_PLANS WHERE PLAN_ID = ?`;
-  const result = await sequelize.query(query, { replacements: [planID], type: QueryTypes.SELECT });
+  const result = await sequelize.query(query, {
+    replacements: [planID],
+    type: QueryTypes.SELECT
+  });
 
   if (result.length === 0) return null;
 
@@ -30,11 +41,16 @@ exports.fetchPlanById = async (planID) => {
     planID: plan.PLAN_ID,
     planName: plan.PLAN_NAME,
     planPrice: plan.PLAN_PRICE,
+    planValidity: plan.VALIDITY,
+    planStatus: plan.PLAN_STATUS,
     numberOfUsers: plan.NUMBER_OF_USERS,
-    numberOfDonors: plan.NUMBER_OF_DONORS,
     numberOfDonations: plan.NUMBER_OF_DONATIONS,
-    form10BEReport: plan.FORM_10BE_REPORT,
-    status: plan.STATUS,
+    numberOfProjects: plan.NO_OF_PROJECTS,
+    form10BdData: plan.FORM_10BD_DATA,
+    form10BEMail: plan.FORM_10BE_MAIL,
+    caAccess: plan.CA_ACCESS,
+    createDate: plan.CREATED_AT,
+    updateDate: plan.UPDATED_AT
   };
 };
 

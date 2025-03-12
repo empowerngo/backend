@@ -17,7 +17,7 @@ exports.handler = async (event) => {
 
     // Authenticate request
     const authResponse = await verifyToken(event.headers.Authorization);
-    if (!authResponse || authResponse.role !== 2) {
+    if (!authResponse || ![2].includes(authResponse.role)) {
       return getResponseObject({
         status: false,
         statusCode: HTTP_CODE.FORBIDDEN,

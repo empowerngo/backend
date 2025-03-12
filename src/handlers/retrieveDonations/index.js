@@ -15,13 +15,13 @@ exports.handler = async (event) => {
       });
     }
 
-    // Authenticate request
+    // // Authenticate request
     const authResponse = await verifyToken(event.headers.Authorization);
-    if (!authResponse || authResponse.role !== 2) {
+    if (!authResponse || ![2, 3, 4].includes(authResponse.role)) {
       return getResponseObject({
         status: false,
         statusCode: HTTP_CODE.FORBIDDEN,
-        message: "Only admins can retrieve donations data.",
+        message: "Only NGO Admin or User or CA can retrieve donations data.",
       });
     }
 
