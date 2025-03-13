@@ -103,6 +103,11 @@ const schema = Joi.object({
     then: Joi.required(),
     otherwise: Joi.optional(),
   }),
+  reg80GDate: Joi.string().when("reqType", {
+    is: "s",
+    then: Joi.required(),
+    otherwise: Joi.optional(),
+  }),
 });
 
 module.exports = schema;

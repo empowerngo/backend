@@ -573,3 +573,25 @@ Resources:
     Metadata:
       BuildMethod: nodejs18.x
 
+  retrieveForm10BDData:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/handlers/retrieveForm10BDData
+      Handler: index.handler
+      FunctionName: retrieveForm10BDData
+      Description: "A lambda to fetch form 10BD data records."
+      Role: !GetAtt lambdaExecutionRole.Arn
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: "/retrieveForm10BDData"
+            Method: POST
+      Environment:
+        Variables:
+          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"                    
+      # Layers:
+      #  - !Ref CommonCodeLayer
+    Metadata:
+      BuildMethod: nodejs18.x
+

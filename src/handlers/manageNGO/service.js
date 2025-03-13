@@ -19,8 +19,8 @@ exports.registerNGO = async parameter => {
     INSERT INTO TB_NGO 
     (NGO_NAME, NGO_ADDRESS, NGO_CITY, NGO_STATE, NGO_COUNTRY, NGO_PINCODE, NGO_EMAIL, NGO_CONTACT, 
      NGO_80G_NUMBER, NGO_12A_NUMBER, NGO_CSR_NUMBER, NGO_FCRA_NUMBER, NGO_PAN, CONTACT_PERSON, NGO_REG_NUMBER, 
-     AUTHORIZED_PERSON,LOGO_URL, SIGNATURE_URL,SEAL_URL , CREATED_AT, UPDATED_AT) 
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?,?, NOW(), NOW())`;
+     AUTHORIZED_PERSON,LOGO_URL, SIGNATURE_URL,SEAL_URL , CREATED_AT, REG80G_DATE,UPDATED_AT) 
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?,?,?, NOW(), NOW())`;
 
     const replacements = [
       parameter.ngoName,
@@ -41,7 +41,8 @@ exports.registerNGO = async parameter => {
       parameter.authorizedPerson,
       parameter.logoURL || null,
       parameter.signatureURL || null,
-      parameter.ngoSealURL || null
+      parameter.ngoSealURL || null,
+      parameter.reg80GDate || null
     ];
 
     const result = await sequelize.query(query, {
@@ -89,7 +90,8 @@ exports.updateNGO = async parameter => {
     ngoRegNumber: "NGO_REG_NUMBER",
     logoURL: "LOGO_URL",
     signatureURL: "SIGNATURE_URL",
-    ngoSealURL: "SEAL_URL"
+    ngoSealURL: "SEAL_URL",
+    reg80GDate:"REG80G_DATE"
   };
 
   // Loop through the fieldMapping and check if any fields are present in the parameter
