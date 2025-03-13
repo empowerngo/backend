@@ -8,7 +8,11 @@ const schema = Joi.object({
     otherwise: Joi.forbidden(),
   }),
   ngoID: Joi.number().required(),
-  projectID: Joi.number().required(),
+  projectID: Joi.string().when("reqType", {
+    is: "s" ||"u",
+    then: Joi.required(),
+    otherwise: Joi.optional(),
+  }),
   purposeName: Joi.string().when("reqType", {
     is: "s" ||"u",
     then: Joi.required(),
