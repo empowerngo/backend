@@ -5,13 +5,19 @@ const {
 
 // Fetch all NGOs
 exports.fetchNGOList = async () => {
-  const query = `SELECT 
-  NGO_ID, NGO_NAME, NGO_ADDRESS, NGO_CITY, NGO_STATE, NGO_COUNTRY, NGO_PINCODE, 
-  NGO_EMAIL, NGO_CONTACT, NGO_80G_NUMBER,REG80G_DATE, NGO_12A_NUMBER, NGO_CSR_NUMBER, NGO_FCRA_NUMBER, 
-  NGO_PAN, CONTACT_PERSON, NGO_REG_NUMBER, LOGO_URL, SIGNATURE_URL,SEAL_URL, AUTHORIZED_PERSON, 
-  CREATED_AT, UPDATED_AT 
-FROM TB_NGO;
-`;
+  const query = ` SELECT
+    n.NGO_ID, n.NGO_NAME, n.NGO_ADDRESS, n.NGO_CITY, n.NGO_STATE, n.NGO_COUNTRY, n.NGO_PINCODE,
+    n.NGO_EMAIL, n.NGO_CONTACT, n.NGO_80G_NUMBER, n.REG80G_DATE, n.NGO_12A_NUMBER, n.NGO_CSR_NUMBER, n.NGO_FCRA_NUMBER,
+    n.NGO_PAN, n.CONTACT_PERSON, n.NGO_REG_NUMBER, n.LOGO_URL, n.SIGNATURE_URL, n.SEAL_URL, n.AUTHORIZED_PERSON,
+    n.CREATED_AT, n.UPDATED_AT, ns.SP_PLANID, s.PLAN_NAME, ns.SP_SUB_DATE, ns.SP_END_DATE, ns.SP_STATUS
+    FROM
+    TB_NGO n
+LEFT JOIN
+    TB_NGO_SUBSCRIPTION ns ON n.NGO_ID = ns.NGO_ID
+LEFT JOIN
+    TB_SUBS_PLANS s ON ns.SP_ID = s.PLAN_ID
+WHERE
+    n.NGO_ID`;
   const ngos = await sequelize.query(query, { type: QueryTypes.SELECT });
 
   return ngos.map(ngo => ({
@@ -36,6 +42,10 @@ FROM TB_NGO;
     signatureURL: ngo.SIGNATURE_URL,
     ngoSealURL: ngo.SEAL_URL,
     authorizedPerson: ngo.AUTHORIZED_PERSON,
+    planID: ngo.SP_PLANID,
+    planName: ngo.PLAN_NAME,
+    subsDate: ngo.SP_SUB_DATE,
+    planExpDate: ngo.SP_END_DATE,
     createdAt: ngo.CREATED_AT,
     updatedAt: ngo.UPDATED_AT
   }));
@@ -44,13 +54,19 @@ FROM TB_NGO;
 // Fetch NGO by ID
 exports.fetchNGOInfo = async ngoID => {
   const query = `
-    SELECT 
-      NGO_ID, NGO_NAME, NGO_ADDRESS, NGO_CITY, NGO_STATE, NGO_COUNTRY, NGO_PINCODE, 
-      NGO_EMAIL, NGO_CONTACT, NGO_80G_NUMBER,REG80G_DATE, NGO_12A_NUMBER, NGO_CSR_NUMBER, NGO_FCRA_NUMBER, 
-      NGO_PAN, CONTACT_PERSON, NGO_REG_NUMBER, LOGO_URL, SIGNATURE_URL,SEAL_URL, AUTHORIZED_PERSON, 
-      CREATED_AT, UPDATED_AT 
-    FROM TB_NGO 
-    WHERE NGO_ID = ?;
+     SELECT
+    n.NGO_ID, n.NGO_NAME, n.NGO_ADDRESS, n.NGO_CITY, n.NGO_STATE, n.NGO_COUNTRY, n.NGO_PINCODE,
+    n.NGO_EMAIL, n.NGO_CONTACT, n.NGO_80G_NUMBER, n.REG80G_DATE, n.NGO_12A_NUMBER, n.NGO_CSR_NUMBER, n.NGO_FCRA_NUMBER,
+    n.NGO_PAN, n.CONTACT_PERSON, n.NGO_REG_NUMBER, n.LOGO_URL, n.SIGNATURE_URL, n.SEAL_URL, n.AUTHORIZED_PERSON,
+    n.CREATED_AT, n.UPDATED_AT, ns.SP_PLANID, s.PLAN_NAME, ns.SP_SUB_DATE, ns.SP_END_DATE, ns.SP_STATUS
+    FROM
+    TB_NGO n
+LEFT JOIN
+    TB_NGO_SUBSCRIPTION ns ON n.NGO_ID = ns.NGO_ID
+LEFT JOIN
+    TB_SUBS_PLANS s ON ns.SP_ID = s.PLAN_ID
+WHERE
+    n.NGO_ID = ?;
   `;
 
   const result = await sequelize.query(query, {
@@ -84,6 +100,10 @@ exports.fetchNGOInfo = async ngoID => {
     signatureURL: ngo.SIGNATURE_URL,
     ngoSealURL: ngo.SEAL_URL,
     authorizedPerson: ngo.AUTHORIZED_PERSON,
+    planID: ngo.SP_PLANID,
+    planName: ngo.PLAN_NAME,
+    subsDate: ngo.SP_SUB_DATE,
+    planExpDate: ngo.SP_END_DATE,
     createdAt: ngo.CREATED_AT,
     updatedAt: ngo.UPDATED_AT
   };
