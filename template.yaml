@@ -595,3 +595,25 @@ Resources:
     Metadata:
       BuildMethod: nodejs18.x
 
+  retrieveDashBoardData:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/handlers/retrieveDashBoardData
+      Handler: index.handler
+      FunctionName: retrieveDashBoardData
+      Description: "A lambda to fetch dashboard Data."
+      Role: !GetAtt lambdaExecutionRole.Arn
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: "/retrieveDashBoardData"
+            Method: POST
+      Environment:
+        Variables:
+          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"                    
+      # Layers:
+      #  - !Ref CommonCodeLayer
+    Metadata:
+      BuildMethod: nodejs18.x
+

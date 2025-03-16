@@ -51,7 +51,7 @@ exports.handler = async (event, context) => {
 
     // Insert donation
     if (parameter.reqType === "s") {
-      const receiptNumber = await service.generateReceiptNumber(parameter.ngoID);
+      const receiptNumber = await service.generateReceiptNumber(parameter.ngoID, parameter.donationDate);
       await service.createDonation(parameter, receiptNumber);
 
       if (parameter.statementID){

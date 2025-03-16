@@ -58,7 +58,8 @@ exports.fetchNGOInfo = async ngoID => {
     n.NGO_ID, n.NGO_NAME, n.NGO_ADDRESS, n.NGO_CITY, n.NGO_STATE, n.NGO_COUNTRY, n.NGO_PINCODE,
     n.NGO_EMAIL, n.NGO_CONTACT, n.NGO_80G_NUMBER, n.REG80G_DATE, n.NGO_12A_NUMBER, n.NGO_CSR_NUMBER, n.NGO_FCRA_NUMBER,
     n.NGO_PAN, n.CONTACT_PERSON, n.NGO_REG_NUMBER, n.LOGO_URL, n.SIGNATURE_URL, n.SEAL_URL, n.AUTHORIZED_PERSON,
-    n.CREATED_AT, n.UPDATED_AT, ns.SP_PLANID, s.PLAN_NAME, ns.SP_SUB_DATE, ns.SP_END_DATE, ns.SP_STATUS
+    n.CREATED_AT, n.UPDATED_AT, ns.SP_PLANID, s.PLAN_NAME, ns.SP_SUB_DATE, ns.SP_END_DATE, ns.SP_STATUS, 
+    s.NUMBER_OF_USERS, s.NUMBER_OF_DONATIONS, s.NO_OF_PROJECTS, s.FORM_10BD_DATA, s.FORM_10BE_MAIL, s.CA_ACCESS
     FROM
     TB_NGO n
 LEFT JOIN
@@ -104,6 +105,12 @@ WHERE
     planName: ngo.PLAN_NAME,
     subsDate: ngo.SP_SUB_DATE,
     planExpDate: ngo.SP_END_DATE,
+    numberOfUsers: ngo.NUMBER_OF_USERS,
+    numberOfProjects: ngo.NO_OF_PROJECTS,
+    numberOfDonations: ngo.NUMBER_OF_DONATIONS, 
+    form10BdData: ngo.FORM_10BD_DATA, 
+    form10BEMail:ngo.FORM_10BE_MAIL, 
+    caAccess: ngo.CA_ACCESS,
     createdAt: ngo.CREATED_AT,
     updatedAt: ngo.UPDATED_AT
   };

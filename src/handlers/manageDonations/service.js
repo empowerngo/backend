@@ -1,7 +1,7 @@
 const { sequelize, QueryTypes } = require("/opt/nodejs/utils/SequelizeWriteConnection");
 
 // Generate sequential receipt number per NGO
-exports.generateReceiptNumber = async (ngoID) => {
+exports.generateReceiptNumber = async (ngoID, donationDate) => {
   const query = `
     INSERT INTO TB_RECEIPT_SEQUENCE (NGO_ID, LAST_RECEIPT_NUMBER)
     VALUES (?, 1)
@@ -19,7 +19,25 @@ exports.generateReceiptNumber = async (ngoID) => {
     { replacements: [ngoID], type: QueryTypes.SELECT }
   );
 
-  return `${ngoID}-${result[0].LAST_RECEIPT_NUMBER}`;
+  // Convert donationDate to a Date object if it's a string
+  const date = typeof donationDate === 'string' ? new Date(donationDate) : donationDate;
+
+  if (!date || isNaN(date.getTime())) {
+    throw new Error('Invalid donationDate provided.');
+  }
+
+  const year = date.getFullYear();
+  const month = date.getMonth() + 1; // Months are 0-indexed
+
+  let finYear;
+
+  if (month >= 4) {
+    finYear = `${year.toString().slice(2)}${(year + 1).toString().slice(2)}`;
+  } else {
+    finYear = `${(year - 1).toString().slice(2)}${year.toString().slice(2)}`;
+  }
+
+  return `${finYear}-${result[0].LAST_RECEIPT_NUMBER}`;
 };
 
 // Insert donation into database
