@@ -91,17 +91,22 @@ exports.fetchNGOAdminData = async (ngoID, startYear, endYear) => {
     WHERE (
       (MONTH(DONATION_DATE) >= 4 AND YEAR(DONATION_DATE) = ?)
       OR (MONTH(DONATION_DATE) <= 3 AND YEAR(DONATION_DATE) = ?)
-    );
+    ) and NGO_ID = ?;
   `;
 
   const userCountQuery = `
     SELECT COUNT(*) AS USER_COUNT FROM TB_USER A, TB_NGO_USER_MAPPING B 
-    WHERE A.USER_ID = B.USER_ID AND B.NGO_ID = ?;
+    WHERE A.USER_ID = B.USER_ID AND B.NGO_ID = ? AND A.USER_STATUS = "ACTIVE";
   `;
 
   const donationSummaryQuery = `
     SELECT PROJECT, PURPOSE, SUM(AMOUNT) AS AMOUNT FROM TB_DONATION
-    WHERE NGO_ID = ? GROUP BY PROJECT, PURPOSE ORDER BY PROJECT;
+    WHERE NGO_ID = ? and
+    (
+      (MONTH(DONATION_DATE) >= 4 AND YEAR(DONATION_DATE) = ?)
+      OR (MONTH(DONATION_DATE) <= 3 AND YEAR(DONATION_DATE) = ?)
+    )
+       GROUP BY PROJECT, PURPOSE ORDER BY PROJECT;
   `;
 
   const [
@@ -120,7 +125,7 @@ exports.fetchNGOAdminData = async (ngoID, startYear, endYear) => {
       type: QueryTypes.SELECT
     }),
     sequelize.query(receiptCountQuery, {
-      replacements: [startYear, endYear],
+      replacements: [ngoID,startYear, endYear],
       type: QueryTypes.SELECT
     }),
     sequelize.query(userCountQuery, {
@@ -128,7 +133,7 @@ exports.fetchNGOAdminData = async (ngoID, startYear, endYear) => {
       type: QueryTypes.SELECT
     }),
     sequelize.query(donationSummaryQuery, {
-      replacements: [ngoID],
+      replacements: [ngoID,startYear, endYear],
       type: QueryTypes.SELECT
     })
   ]);

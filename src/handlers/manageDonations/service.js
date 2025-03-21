@@ -21,6 +21,7 @@ exports.generateReceiptNumber = async (ngoID, donationDate) => {
 
   // Convert donationDate to a Date object if it's a string
   const date = typeof donationDate === 'string' ? new Date(donationDate) : donationDate;
+  console.log("Date - ", date);
 
   if (!date || isNaN(date.getTime())) {
     throw new Error('Invalid donationDate provided.');
@@ -28,6 +29,8 @@ exports.generateReceiptNumber = async (ngoID, donationDate) => {
 
   const year = date.getFullYear();
   const month = date.getMonth() + 1; // Months are 0-indexed
+  console.log("year - ", year);
+  console.log("month - ", month);
 
   let finYear;
 
@@ -37,7 +40,7 @@ exports.generateReceiptNumber = async (ngoID, donationDate) => {
     finYear = `${(year - 1).toString().slice(2)}${year.toString().slice(2)}`;
   }
 
-  return `${finYear}-${result[0].LAST_RECEIPT_NUMBER}`;
+  return `${finYear}-${ngoID}-${result[0].LAST_RECEIPT_NUMBER}`;
 };
 
 // Insert donation into database

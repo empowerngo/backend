@@ -15,8 +15,9 @@ exports.getDonorByPAN = async (donorPAN) => {
             donor.donorFName = decrypt(donor.DONOR_FNAME);
             donor.donorMName = donor.DONOR_MNAME ? decrypt(donor.DONOR_MNAME) : null;
             donor.donorLName = decrypt(donor.DONOR_LNAME);
-            donor.donorPAN = decrypt(donor.DONOR_PAN);
-            donor.donorEmail = decrypt(donor.DONOR_EMAIL);
+            donor.donorPAN = donor.donorPAN ? decrypt(donor.donorPAN) : null;
+            donor.donorAdhar = donor.donorAdhar ? decrypt(donor.donorAdhar) : null;
+            donor.donorEmail = donor.donorEmail ? decrypt(donor.donorEmail) : null;
             donor.donorMobile = decrypt(donor.DONOR_MOBILE);
             return donor;
         }
@@ -58,9 +59,9 @@ exports.addDonor = async (parameter) => {
         const query = `
         INSERT INTO TB_DONOR 
         (DONOR_FNAME, DONOR_MNAME, DONOR_LNAME, DONOR_ADDRESS, DONOR_CITY, DONOR_STATE, 
-         DONOR_COUNTRY, DONOR_PINCODE, DONOR_MOBILE, DONOR_EMAIL, DONOR_PAN, 
+         DONOR_COUNTRY, DONOR_PINCODE, DONOR_MOBILE, DONOR_EMAIL, DONOR_PAN, DONOR_ADHAR, DONOR_DOB,
          DONOR_PROFESSION, DONOR_TYPE, CREATED_AT, UPDATED_AT) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`;
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`;
 
         const donorMName = parameter.donorMName && parameter.donorMName.trim() !== "" 
             ? encrypt(parameter.donorMName) 
@@ -75,9 +76,11 @@ exports.addDonor = async (parameter) => {
             parameter.donorState,
             parameter.donorCountry,
             parameter.donorPinCode,
-            encrypt(parameter.donorMobile.toString()),
-            encrypt(parameter.donorEmail),
-            encrypt(parameter.donorPAN.toString()),
+            parameter.donorMobile ? encrypt(parameter.donorMobile) : null,
+            parameter.donorEmail ? encrypt(parameter.donorEmail) : null,
+            parameter.donorPAN ? encrypt(parameter.donorPAN) : null,
+            parameter.donorAdhar ? encrypt(parameter.donorAdhar) : null,
+            parameter.donorDOB,
             parameter.donorProfession,
             parameter.donorType,
         ];
@@ -107,30 +110,20 @@ exports.updateDonor = async (parameter) => {
         donorCountry: "DONOR_COUNTRY",
         donorPinCode: "DONOR_PINCODE",
         donorPAN: "DONOR_PAN",
+        donorAdhar: "DONOR_ADHAR",
+        donorDOB: "DONOR_DOB",
         donorEmail: "DONOR_EMAIL",
         donorMobile: "DONOR_MOBILE",
         donorProfession: "DONOR_PROFESSION",
         donorType: "DONOR_TYPE",
     };
 
-    // Encrypt necessary fields
-    // Object.keys(fieldMapping).forEach((key) => {
-    //     if (parameter[key] !== undefined && parameter[key] !== null) {
-    //         const value = ["donorFName", "donorMName", "donorLName", "donorPAN", "donorEmail", "donorMobile"].includes(key)
-    //             ? encrypt(key === "donorMobile" ? parameter[key].toString() : parameter[key]) // Convert donorMobile to string before encryption
-    //             : parameter[key];
-        
-    //         fields.push(`${fieldMapping[key]} = ?`);
-    //         replacements.push(value);
-    //     }
-    // });
-
-    Object.keys(fieldMapping).forEach((key) => {
+     Object.keys(fieldMapping).forEach((key) => {
         if (parameter[key] !== undefined && parameter[key] !== null) {
             let value = parameter[key]; // Default to the original value
     
             // Encrypt specific fields after converting to string (if needed)
-            if (["donorFName", "donorMName", "donorLName", "donorPAN", "donorEmail", "donorMobile"].includes(key)) {
+            if (["donorFName", "donorMName", "donorLName", "donorPAN", "donorEmail", "donorMobile","donorAdhar"].includes(key)) {
                 value = encrypt(value.toString()); 
             }
     

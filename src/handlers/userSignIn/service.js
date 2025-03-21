@@ -21,7 +21,7 @@ exports.authenticateUser = async (email, password) => {
     FROM TB_USER U
     LEFT JOIN TB_NGO_USER_MAPPING M ON U.USER_ID = M.USER_ID
     LEFT JOIN TB_NGO N ON M.NGO_ID = N.NGO_ID
-    WHERE U.EMAIL = ?;
+    WHERE U.EMAIL = ? and U.USER_STATUS = "ACTIVE";
   `;
 
   const result = await sequelize.query(query, {

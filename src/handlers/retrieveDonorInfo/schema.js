@@ -32,11 +32,17 @@ const schema = Joi.object({
     then: Joi.optional(),
     otherwise: Joi.forbidden(),
   }),
+  donorAdhar: Joi.string().when("reqType", {
+    is: "param",
+    then: Joi.optional(),
+    otherwise: Joi.forbidden(),
+  }),
 }).when(Joi.object({ reqType: Joi.valid('param') }).unknown(), {
   then: Joi.object({
     donorFName: Joi.string().required(),
     donorLName: Joi.forbidden(),
     donorPAN: Joi.forbidden(),
+    donorAdhar: Joi.forbidden(),
     donorMobile: Joi.forbidden(),
   }).xor('donorFName', 'donorLName', 'donorPAN', 'donorMobile'),
 });

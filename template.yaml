@@ -617,3 +617,25 @@ Resources:
     Metadata:
       BuildMethod: nodejs18.x
 
+  retrieveUsageNPlanInfo:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/handlers/retrieveUsageNPlanInfo
+      Handler: index.handler
+      FunctionName: retrieveUsageNPlanInfo
+      Description: "A lambda to fetch usage and plan Data."
+      Role: !GetAtt lambdaExecutionRole.Arn
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: "/retrieveUsageNPlanInfo"
+            Method: POST
+      Environment:
+        Variables:
+          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"                    
+      # Layers:
+      #  - !Ref CommonCodeLayer
+    Metadata:
+      BuildMethod: nodejs18.x
+
