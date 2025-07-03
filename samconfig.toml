@@ -1,9 +1,8 @@
-# More information about the configuration file can be found here:
-# https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-config.html
+# SAM Configuration for Unified API
 version = 0.1
 
 [default.global.parameters]
-stack_name = "emp-backend"
+stack_name = "emp-backend-unified"
 
 [default.build.parameters]
 cached = true
@@ -13,18 +12,15 @@ parallel = true
 lint = true
 
 [default.deploy.parameters]
-capabilities = "CAPABILITY_IAM"
+template_file = "template.yaml"
+capabilities = "CAPABILITY_NAMED_IAM"
 confirm_changeset = true
 resolve_s3 = true
-stack_name = "emp-backend"
-s3_prefix = "emp-backend"
+stack_name = "emp-backend-unified"
+s3_prefix = "emp-backend-unified"
 region = "ap-south-1"
-disable_rollback = true
-
-parameter_overrides = "DBHOST=\"dms.c5g64064s955.ap-south-1.rds.amazonaws.com\" DBNAME=\"DMS_TEST\" DBUSER=\"dmsdatabase\" DBPASSWORD=\"teamtech#2k25\" DBPORT=\"3306\""
-#parameter_overrides = "DBHOST=\"ka-devops.crqw00kkqjni.ap-south-1.rds.amazonaws.com\" DBNAME=\"khana_prod\" DBUSER=\"kaprod\" DBPASSWORD=\"Khana2020\" DBPORT=\"3306\""
+disable_rollback = false
 image_repositories = []
-
 
 [default.package.parameters]
 resolve_s3 = true

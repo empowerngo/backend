@@ -1,138 +1,105 @@
-# TODO
-# - Enhance Policies for each lambda function
-# - Nested template.yml structure [https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-template-nested-applications.html]
-# - Solar linter for build process
-
 AWSTemplateFormatVersion: 2010-09-09
 Transform:
   - AWS::Serverless-2016-10-31
 Description: >-
-  khana-backend
+  khana-backend-unified - Single API with /stage and /prod paths
 
 Parameters:
-  DBHOST:
+  StageDBUserName:
+    Description: "Stage database username"
+    Type: "String"
+    Default: "stageusr"
+    NoEcho: false
+  StageDBPassword:
+    Description: "Stage database password"
+    Type: "String"
+    Default: "StagePass2025!"
+    NoEcho: true
+  ProdDBUserName:
+    Description: "Production database username"
+    Type: "String"
+    Default: "produsr"
+    NoEcho: false
+  ProdDBPassword:
+    Description: "Production database password"
+    Type: "String"
+    Default: "ProdPass2025!"
+    NoEcho: true
+  SMSKEY:
     Description: ""
     Type: "String"
-    Default: "dms.c5g64064s955.ap-south-1.rds.amazonaws.com"
-  DBNAME:
+    Default: "e2b658cd81f940afa781b043878a21da"
+  SMSHEADER:
     Description: ""
     Type: "String"
-    Default: "dmsdatabase"
-  DBUSER:
+    Default: "ea2a110e707044d7875e536624e75a95"
+  SMSURL:
     Description: ""
     Type: "String"
-    Default: "dmsdatabase"
-  DBPASSWORD:
-    Description: ""
-    Type: "String"
-    Default: "teamtech#2k25"
-  DBPORT:
-    Description: ""
-    Type: "String"
-    Default: "3306"
-  
-
-
-# Parameters:
-#   DBHOST:
-#     Description: ""
-#     Type: "String"
-#     Default: "ka-devops.crqw00kkqjni.ap-south-1.rds.amazonaws.com"
-#   DBNAME:
-#     Description: ""
-#     Type: "String"
-#     Default: "khana_prod"
-#   DBUSER:
-#     Description: ""
-#     Type: "String"
-#     Default: "kaprod"
-#   DBPASSWORD:
-#     Description: ""
-#     Type: "String"
-#     Default: "Khana2020"
-#   DBPORT:
-#     Description: ""
-#     Type: "String"
-#     Default: "3306"
-#   SMSKEY:
-#     Description: ""
-#     Type: "String"
-#     Default: "e2b658cd81f940afa781b043878a21da"
-#   SMSHEADER:
-#     Description: ""
-#     Type: "String"
-#     Default: "ea2a110e707044d7875e536624e75a95"
-#   SMSURL:
-#     Description: ""
-#     Type: "String"
-#     Default: "http://sms.pearlsms.com/public/sms/sendjson"
-
+    Default: "http://sms.pearlsms.com/public/sms/sendjson"
 
 Globals:
-  # Api:
-  #   Auth:
-  #     AddDefaultAuthorizerToCorsPreflight: false
-  #     DefailtAuthorizer: RequestAuthorizer
-  #     Authorizers:
-  #       RequestAuthorizer:
-  #         FunctionPayloadType: REQUEST
-  #         FunctionArn: !GetAtt ka-authorizer-function.Arn
-  #         Identity:
-  #           ReauthorizeEvery: 0
-    # Cors:
-    #   AllowMethods: "'GET,POST,OPTIONS'"
-    #   AlloweHeaders: "'*'"
-    #   AllowOrigin: "'*'"
-    #   AllowCredentials: "'*'"
-    # GatewayResponses:
-    #   DEFAULT_4XX:
-    #     ResponseParameters:
-    #       Headers:
-    #         Access-Control-Allow-Menthods: "'GET,POST,OPTIONS'"          
-    #         Access-Control-Allow-Headers: "'*'"
-    #         Access-Control-Allow-Origin: "'*'"
-    #         Access-Control-Allow-Credentials: "'*'"
-    #   DEFAULT_5XX:
-    #     ResponseParameters:
-    #       Headers:
-    #         Access-Control-Allow-Menthods: "'GET,POST,OPTIONS'"          
-    #         Access-Control-Allow-Headers: "'*'"
-    #         Access-Control-Allow-Origin: "'*'"
-    #         Access-Control-Allow-Credentials: "'*'"
-
   Api:
     Cors:
       AllowHeaders: "'*'"
-      AllowMethods: "'GET,POST, PUT, OPTIONS'" 
-      AllowOrigin: "'*'"  
+      AllowMethods: "'GET,POST, PUT, OPTIONS'"
+      AllowOrigin: "'*'"
 
-
-  Function:
-    Environment:
-      Variables:
-        DB_HOST: !Ref DBHOST
-        DB_NAME: !Ref DBNAME
-        DB_USER: !Ref DBUSER
-        DB_PASSWORD: !Ref DBPASSWORD
-        DB_PORT: !Ref DBPORT
-        EMAIL_USER: "teamtech993@gmail.com"         # Email address for sending emails
-        EMAIL_PASS: "Tech@2468"         # App-specific password or email account password
-        ADMIN_EMAIL: "jeeva7777@gmail.com"       # Admin email to receive notifications
-        EMAIL_SERVICE: "gmail"                    # Email service (e.g., Gmail, Outlook, etc.)
-        NODE_ENV: "test" 
-        LIMIT: 20
-    Runtime: nodejs18.x
-    MemorySize: 256
-    Timeout: 60
-    Layers:
-      - !Ref CommonLayer
 Resources:
+  # Stage RDS Database
+  StageDatabase:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBInstanceIdentifier: emp-backend-stage-db-uni-1751365483
+      DBName: empbackendstage
+      DBInstanceClass: db.t3.micro
+      Engine: mysql
+      EngineVersion: "8.0.35"
+      MasterUsername: !Ref StageDBUserName
+      MasterUserPassword: !Ref StageDBPassword
+      AllocatedStorage: 20
+      StorageType: gp2
+      PubliclyAccessible: true
+      BackupRetentionPeriod: 7
+      DeletionProtection: true
+      StorageEncrypted: true
+      Tags:
+        - Key: Environment
+          Value: stage
+        - Key: Name
+          Value: emp-backend-stage-database
+
+  # Production RDS Database
+  ProductionDatabase:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBInstanceIdentifier: emp-backend-prod-db-uni-1751365483
+      DBName: empbackendprod
+      DBInstanceClass: db.t3.small
+      Engine: mysql
+      EngineVersion: "8.0.35"
+      MasterUsername: !Ref ProdDBUserName
+      MasterUserPassword: !Ref ProdDBPassword
+      AllocatedStorage: 100
+      StorageType: gp2
+      BackupRetentionPeriod: 30
+      PubliclyAccessible: true
+      DeletionProtection: true
+      StorageEncrypted: true
+      MultiAZ: true
+      Tags:
+        - Key: Environment
+          Value: prod
+        - Key: Name
+          Value: emp-backend-prod-database
+
+  # IAM Role for Lambda
   lambdaExecutionRole:
     Type: AWS::IAM::Role
     Properties:
+      RoleName: "emp-backend-unified-lambda-role"
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
-        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
         - arn:aws:iam::aws:policy/SecretsManagerReadWrite
         - arn:aws:iam::aws:policy/service-role/AWSLambdaRole
         - arn:aws:iam::aws:policy/AWSLambdaExecute
@@ -152,15 +119,17 @@ Resources:
             Version: "2012-10-17"
             Statement:
               - Effect: Allow
-                Action: 
+                Action:
                   - ssm:GetParameter
-                Resource: "arn:aws:ssm:ap-south-1:509399613408:parameter/emp-backend/jwt-secret"
+                  - ssm:GetParameters
+                Resource:
+                  - "arn:aws:ssm:ap-south-1:*:parameter/emp-backend/*"
 
-
+  # Common Layer
   CommonLayer:
     Type: AWS::Serverless::LayerVersion
     Properties:
-      LayerName: common-layer
+      LayerName: "common-layer-unified"
       Description: Code shared across all lambda functions
       ContentUri: src/layers/common-layer
       CompatibleRuntimes:
@@ -169,473 +138,1659 @@ Resources:
     Metadata:
       BuildMethod: makefile
 
- 
-    
-  manageDonor:
+  # manageDonor - Stage Environment
+  manageDonorStage:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: src/handlers/manageDonor
       Handler: index.handler
-      FunctionName: manageDonor
-      Description: "A lambda to add donor."
+      FunctionName: "manageDonor-stage"
+      Description: "manageDonor - STAGE"
+      Role: !GetAtt lambdaExecutionRole.Arn
+      Runtime: nodejs18.x
+      Timeout: 60
+      MemorySize: 512
+      Layers:
+        - !Ref CommonLayer
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: "/stage/manageDonor"
+            Method: POST
+      Environment:
+        Variables:
+          DB_HOST: !GetAtt StageDatabase.Endpoint.Address
+          DB_NAME: empbackendstage
+          DB_USER: !Ref StageDBUserName
+          DB_PASSWORD: !Ref StageDBPassword
+          DB_PORT: !GetAtt StageDatabase.Endpoint.Port
+          ENVIRONMENT: "stage"
+          JWT_SECRET_PARAM: "/emp-backend/stage/jwt-secret"
+          EMAIL_USER: "teamtech993@gmail.com"
+          EMAIL_PASS: "Tech@2468"
+          ADMIN_EMAIL: "jeeva7777@gmail.com"
+          EMAIL_SERVICE: "gmail"
+          NODE_ENV: "stage"
+          LIMIT: 20
+          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"
+      Runtime: nodejs18.x
+      MemorySize: 256
+      Timeout: 60
+      Layers:
+        - !Ref CommonLayer
+    Metadata:
+      BuildMethod: nodejs18.x
+
+  # manageDonor - Production Environment
+  manageDonorProd:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/handlers/manageDonor
+      Handler: index.handler
+      FunctionName: "manageDonor-prod"
+      Description: "manageDonor - PRODUCTION"
       Role: !GetAtt lambdaExecutionRole.Arn
       Events:
         Api:
           Type: Api
           Properties:
-            Path: "/manageDonor"
+            Path: "/prod/manageDonor"
             Method: POST
       Environment:
         Variables:
-          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"            
-      # Layers:
-      #  - !Ref CommonCodeLayer
+          DB_HOST: !GetAtt ProductionDatabase.Endpoint.Address
+          DB_NAME: empbackendprod
+          DB_USER: !Ref ProdDBUserName
+          DB_PASSWORD: !Ref ProdDBPassword
+          DB_PORT: !GetAtt ProductionDatabase.Endpoint.Port
+          ENVIRONMENT: "prod"
+          EMAIL_USER: "teamtech993@gmail.com"
+          EMAIL_PASS: "Tech@2468"
+          ADMIN_EMAIL: "jeeva7777@gmail.com"
+          EMAIL_SERVICE: "gmail"
+          NODE_ENV: "production"
+          LIMIT: 20
+          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"
+      Runtime: nodejs18.x
+      MemorySize: 256
+      Timeout: 60
+      Layers:
+        - !Ref CommonLayer
     Metadata:
       BuildMethod: nodejs18.x
 
-  manageNGO:
+  # manageNGO - Stage Environment
+  manageNGOStage:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: src/handlers/manageNGO
       Handler: index.handler
-      FunctionName: manageNGO
-      Description: "A lambda to manage NGO (add/Update)"
+      FunctionName: "manageNGO-stage"
+      Description: "manageNGO - STAGE"
       Role: !GetAtt lambdaExecutionRole.Arn
       Events:
         Api:
           Type: Api
           Properties:
-            Path: "/manageNGO"
+            Path: "/stage/manageNGO"
             Method: POST
       Environment:
         Variables:
-          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"            
-      # Layers:
-      #  - !Ref CommonCodeLayer
+          DB_HOST: !GetAtt StageDatabase.Endpoint.Address
+          DB_NAME: empbackendstage
+          DB_USER: !Ref StageDBUserName
+          DB_PASSWORD: !Ref StageDBPassword
+          DB_PORT: !GetAtt StageDatabase.Endpoint.Port
+          ENVIRONMENT: "stage"
+          EMAIL_USER: "teamtech993@gmail.com"
+          EMAIL_PASS: "Tech@2468"
+          ADMIN_EMAIL: "jeeva7777@gmail.com"
+          EMAIL_SERVICE: "gmail"
+          NODE_ENV: "stage"
+          LIMIT: 20
+          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"
+      Runtime: nodejs18.x
+      MemorySize: 256
+      Timeout: 60
+      Layers:
+        - !Ref CommonLayer
     Metadata:
       BuildMethod: nodejs18.x
 
-  manageProject:
+  # manageNGO - Production Environment
+  manageNGOProd:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/handlers/manageNGO
+      Handler: index.handler
+      FunctionName: "manageNGO-prod"
+      Description: "manageNGO - PRODUCTION"
+      Role: !GetAtt lambdaExecutionRole.Arn
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: "/prod/manageNGO"
+            Method: POST
+      Environment:
+        Variables:
+          DB_HOST: !GetAtt ProductionDatabase.Endpoint.Address
+          DB_NAME: empbackendprod
+          DB_USER: !Ref ProdDBUserName
+          DB_PASSWORD: !Ref ProdDBPassword
+          DB_PORT: !GetAtt ProductionDatabase.Endpoint.Port
+          ENVIRONMENT: "prod"
+          EMAIL_USER: "teamtech993@gmail.com"
+          EMAIL_PASS: "Tech@2468"
+          ADMIN_EMAIL: "jeeva7777@gmail.com"
+          EMAIL_SERVICE: "gmail"
+          NODE_ENV: "production"
+          LIMIT: 20
+          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"
+      Runtime: nodejs18.x
+      MemorySize: 256
+      Timeout: 60
+      Layers:
+        - !Ref CommonLayer
+    Metadata:
+      BuildMethod: nodejs18.x
+
+  # manageProject - Stage Environment
+  manageProjectStage:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: src/handlers/manageProject
       Handler: index.handler
-      FunctionName: manageProject
-      Description: "A lambda to manage NGO Project (add/Update)"
+      FunctionName: "manageProject-stage"
+      Description: "manageProject - STAGE"
       Role: !GetAtt lambdaExecutionRole.Arn
       Events:
         Api:
           Type: Api
           Properties:
-            Path: "/manageProject"
+            Path: "/stage/manageProject"
             Method: POST
       Environment:
         Variables:
-          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"            
-      # Layers:
-      #  - !Ref CommonCodeLayer
+          DB_HOST: !GetAtt StageDatabase.Endpoint.Address
+          DB_NAME: empbackendstage
+          DB_USER: !Ref StageDBUserName
+          DB_PASSWORD: !Ref StageDBPassword
+          DB_PORT: !GetAtt StageDatabase.Endpoint.Port
+          ENVIRONMENT: "stage"
+          EMAIL_USER: "teamtech993@gmail.com"
+          EMAIL_PASS: "Tech@2468"
+          ADMIN_EMAIL: "jeeva7777@gmail.com"
+          EMAIL_SERVICE: "gmail"
+          NODE_ENV: "stage"
+          LIMIT: 20
+          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"
+      Runtime: nodejs18.x
+      MemorySize: 256
+      Timeout: 60
+      Layers:
+        - !Ref CommonLayer
     Metadata:
       BuildMethod: nodejs18.x
 
-  managePurpose:
+  # manageProject - Production Environment
+  manageProjectProd:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/handlers/manageProject
+      Handler: index.handler
+      FunctionName: "manageProject-prod"
+      Description: "manageProject - PRODUCTION"
+      Role: !GetAtt lambdaExecutionRole.Arn
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: "/prod/manageProject"
+            Method: POST
+      Environment:
+        Variables:
+          DB_HOST: !GetAtt ProductionDatabase.Endpoint.Address
+          DB_NAME: empbackendprod
+          DB_USER: !Ref ProdDBUserName
+          DB_PASSWORD: !Ref ProdDBPassword
+          DB_PORT: !GetAtt ProductionDatabase.Endpoint.Port
+          ENVIRONMENT: "prod"
+          EMAIL_USER: "teamtech993@gmail.com"
+          EMAIL_PASS: "Tech@2468"
+          ADMIN_EMAIL: "jeeva7777@gmail.com"
+          EMAIL_SERVICE: "gmail"
+          NODE_ENV: "production"
+          LIMIT: 20
+          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"
+      Runtime: nodejs18.x
+      MemorySize: 256
+      Timeout: 60
+      Layers:
+        - !Ref CommonLayer
+    Metadata:
+      BuildMethod: nodejs18.x
+
+  # managePurpose - Stage Environment
+  managePurposeStage:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: src/handlers/managePurpose
       Handler: index.handler
-      FunctionName: managePurpose
-      Description: "A lambda to manage NGO managePurpose (add/Update)"
+      FunctionName: "managePurpose-stage"
+      Description: "managePurpose - STAGE"
       Role: !GetAtt lambdaExecutionRole.Arn
       Events:
         Api:
           Type: Api
           Properties:
-            Path: "/managePurpose"
+            Path: "/stage/managePurpose"
             Method: POST
       Environment:
         Variables:
-          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"            
-      # Layers:
-      #  - !Ref CommonCodeLayer
+          DB_HOST: !GetAtt StageDatabase.Endpoint.Address
+          DB_NAME: empbackendstage
+          DB_USER: !Ref StageDBUserName
+          DB_PASSWORD: !Ref StageDBPassword
+          DB_PORT: !GetAtt StageDatabase.Endpoint.Port
+          ENVIRONMENT: "stage"
+          EMAIL_USER: "teamtech993@gmail.com"
+          EMAIL_PASS: "Tech@2468"
+          ADMIN_EMAIL: "jeeva7777@gmail.com"
+          EMAIL_SERVICE: "gmail"
+          NODE_ENV: "stage"
+          LIMIT: 20
+          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"
+      Runtime: nodejs18.x
+      MemorySize: 256
+      Timeout: 60
+      Layers:
+        - !Ref CommonLayer
     Metadata:
       BuildMethod: nodejs18.x
 
-  manageLeads:
+  # managePurpose - Production Environment
+  managePurposeProd:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/handlers/managePurpose
+      Handler: index.handler
+      FunctionName: "managePurpose-prod"
+      Description: "managePurpose - PRODUCTION"
+      Role: !GetAtt lambdaExecutionRole.Arn
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: "/prod/managePurpose"
+            Method: POST
+      Environment:
+        Variables:
+          DB_HOST: !GetAtt ProductionDatabase.Endpoint.Address
+          DB_NAME: empbackendprod
+          DB_USER: !Ref ProdDBUserName
+          DB_PASSWORD: !Ref ProdDBPassword
+          DB_PORT: !GetAtt ProductionDatabase.Endpoint.Port
+          ENVIRONMENT: "prod"
+          EMAIL_USER: "teamtech993@gmail.com"
+          EMAIL_PASS: "Tech@2468"
+          ADMIN_EMAIL: "jeeva7777@gmail.com"
+          EMAIL_SERVICE: "gmail"
+          NODE_ENV: "production"
+          LIMIT: 20
+          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"
+      Runtime: nodejs18.x
+      MemorySize: 256
+      Timeout: 60
+      Layers:
+        - !Ref CommonLayer
+    Metadata:
+      BuildMethod: nodejs18.x
+
+  # manageLeads - Stage Environment
+  manageLeadsStage:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: src/handlers/manageLeads
       Handler: index.handler
-      FunctionName: manageLeads
-      Description: "A lambda to handle contact Leads."
+      FunctionName: "manageLeads-stage"
+      Description: "manageLeads - STAGE"
       Role: !GetAtt lambdaExecutionRole.Arn
       Events:
         Api:
           Type: Api
           Properties:
-            Path: "/manageLeads"
+            Path: "/stage/manageLeads"
             Method: POST
       Environment:
         Variables:
-          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"            
-      # Layers:
-      #  - !Ref CommonCodeLayer
+          DB_HOST: !GetAtt StageDatabase.Endpoint.Address
+          DB_NAME: empbackendstage
+          DB_USER: !Ref StageDBUserName
+          DB_PASSWORD: !Ref StageDBPassword
+          DB_PORT: !GetAtt StageDatabase.Endpoint.Port
+          ENVIRONMENT: "stage"
+          EMAIL_USER: "teamtech993@gmail.com"
+          EMAIL_PASS: "Tech@2468"
+          ADMIN_EMAIL: "jeeva7777@gmail.com"
+          EMAIL_SERVICE: "gmail"
+          NODE_ENV: "stage"
+          LIMIT: 20
+          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"
+      Runtime: nodejs18.x
+      MemorySize: 256
+      Timeout: 60
+      Layers:
+        - !Ref CommonLayer
     Metadata:
       BuildMethod: nodejs18.x
 
-  manageUserRegistration:
+  # manageLeads - Production Environment
+  manageLeadsProd:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/handlers/manageLeads
+      Handler: index.handler
+      FunctionName: "manageLeads-prod"
+      Description: "manageLeads - PRODUCTION"
+      Role: !GetAtt lambdaExecutionRole.Arn
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: "/prod/manageLeads"
+            Method: POST
+      Environment:
+        Variables:
+          DB_HOST: !GetAtt ProductionDatabase.Endpoint.Address
+          DB_NAME: empbackendprod
+          DB_USER: !Ref ProdDBUserName
+          DB_PASSWORD: !Ref ProdDBPassword
+          DB_PORT: !GetAtt ProductionDatabase.Endpoint.Port
+          ENVIRONMENT: "prod"
+          EMAIL_USER: "teamtech993@gmail.com"
+          EMAIL_PASS: "Tech@2468"
+          ADMIN_EMAIL: "jeeva7777@gmail.com"
+          EMAIL_SERVICE: "gmail"
+          NODE_ENV: "production"
+          LIMIT: 20
+          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"
+      Runtime: nodejs18.x
+      MemorySize: 256
+      Timeout: 60
+      Layers:
+        - !Ref CommonLayer
+    Metadata:
+      BuildMethod: nodejs18.x
+
+  # manageUserRegistration - Stage Environment
+  manageUserRegistrationStage:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: src/handlers/manageUserRegistration
       Handler: index.handler
-      FunctionName: manageUserRegistration
-      Description: "A lambda to handle register users."
+      FunctionName: "manageUserRegistration-stage"
+      Description: "manageUserRegistration - STAGE"
       Role: !GetAtt lambdaExecutionRole.Arn
       Events:
         Api:
           Type: Api
           Properties:
-            Path: "/manageUserRegistration"
+            Path: "/stage/manageUserRegistration"
             Method: POST
       Environment:
         Variables:
-          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"            
-      # Layers:
-      #  - !Ref CommonCodeLayer
+          DB_HOST: !GetAtt StageDatabase.Endpoint.Address
+          DB_NAME: empbackendstage
+          DB_USER: !Ref StageDBUserName
+          DB_PASSWORD: !Ref StageDBPassword
+          DB_PORT: !GetAtt StageDatabase.Endpoint.Port
+          ENVIRONMENT: "stage"
+          EMAIL_USER: "teamtech993@gmail.com"
+          EMAIL_PASS: "Tech@2468"
+          ADMIN_EMAIL: "jeeva7777@gmail.com"
+          EMAIL_SERVICE: "gmail"
+          NODE_ENV: "stage"
+          LIMIT: 20
+          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"
+      Runtime: nodejs18.x
+      MemorySize: 256
+      Timeout: 60
+      Layers:
+        - !Ref CommonLayer
     Metadata:
       BuildMethod: nodejs18.x
 
-  retrieveUsersInfo:
+  # manageUserRegistration - Production Environment
+  manageUserRegistrationProd:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/handlers/manageUserRegistration
+      Handler: index.handler
+      FunctionName: "manageUserRegistration-prod"
+      Description: "manageUserRegistration - PRODUCTION"
+      Role: !GetAtt lambdaExecutionRole.Arn
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: "/prod/manageUserRegistration"
+            Method: POST
+      Environment:
+        Variables:
+          DB_HOST: !GetAtt ProductionDatabase.Endpoint.Address
+          DB_NAME: empbackendprod
+          DB_USER: !Ref ProdDBUserName
+          DB_PASSWORD: !Ref ProdDBPassword
+          DB_PORT: !GetAtt ProductionDatabase.Endpoint.Port
+          ENVIRONMENT: "prod"
+          EMAIL_USER: "teamtech993@gmail.com"
+          EMAIL_PASS: "Tech@2468"
+          ADMIN_EMAIL: "jeeva7777@gmail.com"
+          EMAIL_SERVICE: "gmail"
+          NODE_ENV: "production"
+          LIMIT: 20
+          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"
+      Runtime: nodejs18.x
+      MemorySize: 256
+      Timeout: 60
+      Layers:
+        - !Ref CommonLayer
+    Metadata:
+      BuildMethod: nodejs18.x
+
+  # retrieveUsersInfo - Stage Environment
+  retrieveUsersInfoStage:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: src/handlers/retrieveUsersInfo
       Handler: index.handler
-      FunctionName: retrieveUsersInfo
-      Description: "A lambda to fetch users lists and details."
+      FunctionName: "retrieveUsersInfo-stage"
+      Description: "retrieveUsersInfo - STAGE"
       Role: !GetAtt lambdaExecutionRole.Arn
       Events:
         Api:
           Type: Api
           Properties:
-            Path: "/retrieveUsersInfo"
+            Path: "/stage/retrieveUsersInfo"
             Method: POST
       Environment:
         Variables:
-          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"            
-      # Layers:
-      #  - !Ref CommonCodeLayer
+          DB_HOST: !GetAtt StageDatabase.Endpoint.Address
+          DB_NAME: empbackendstage
+          DB_USER: !Ref StageDBUserName
+          DB_PASSWORD: !Ref StageDBPassword
+          DB_PORT: !GetAtt StageDatabase.Endpoint.Port
+          ENVIRONMENT: "stage"
+          EMAIL_USER: "teamtech993@gmail.com"
+          EMAIL_PASS: "Tech@2468"
+          ADMIN_EMAIL: "jeeva7777@gmail.com"
+          EMAIL_SERVICE: "gmail"
+          NODE_ENV: "stage"
+          LIMIT: 20
+          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"
+      Runtime: nodejs18.x
+      MemorySize: 256
+      Timeout: 60
+      Layers:
+        - !Ref CommonLayer
     Metadata:
       BuildMethod: nodejs18.x
 
-  retrieveNGOInfo:
+  # retrieveUsersInfo - Production Environment
+  retrieveUsersInfoProd:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/handlers/retrieveUsersInfo
+      Handler: index.handler
+      FunctionName: "retrieveUsersInfo-prod"
+      Description: "retrieveUsersInfo - PRODUCTION"
+      Role: !GetAtt lambdaExecutionRole.Arn
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: "/prod/retrieveUsersInfo"
+            Method: POST
+      Environment:
+        Variables:
+          DB_HOST: !GetAtt ProductionDatabase.Endpoint.Address
+          DB_NAME: empbackendprod
+          DB_USER: !Ref ProdDBUserName
+          DB_PASSWORD: !Ref ProdDBPassword
+          DB_PORT: !GetAtt ProductionDatabase.Endpoint.Port
+          ENVIRONMENT: "prod"
+          EMAIL_USER: "teamtech993@gmail.com"
+          EMAIL_PASS: "Tech@2468"
+          ADMIN_EMAIL: "jeeva7777@gmail.com"
+          EMAIL_SERVICE: "gmail"
+          NODE_ENV: "production"
+          LIMIT: 20
+          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"
+      Runtime: nodejs18.x
+      MemorySize: 256
+      Timeout: 60
+      Layers:
+        - !Ref CommonLayer
+    Metadata:
+      BuildMethod: nodejs18.x
+
+  # retrieveNGOInfo - Stage Environment
+  retrieveNGOInfoStage:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: src/handlers/retrieveNGOInfo
       Handler: index.handler
-      FunctionName: retrieveNGOInfo
-      Description: "A lambda to fetch NGO list and info."
+      FunctionName: "retrieveNGOInfo-stage"
+      Description: "retrieveNGOInfo - STAGE"
       Role: !GetAtt lambdaExecutionRole.Arn
       Events:
         Api:
           Type: Api
           Properties:
-            Path: "/retrieveNGOInfo"
+            Path: "/stage/retrieveNGOInfo"
             Method: POST
       Environment:
         Variables:
-          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"                  
-      # Layers:
-      #  - !Ref CommonCodeLayer
+          DB_HOST: !GetAtt StageDatabase.Endpoint.Address
+          DB_NAME: empbackendstage
+          DB_USER: !Ref StageDBUserName
+          DB_PASSWORD: !Ref StageDBPassword
+          DB_PORT: !GetAtt StageDatabase.Endpoint.Port
+          ENVIRONMENT: "stage"
+          EMAIL_USER: "teamtech993@gmail.com"
+          EMAIL_PASS: "Tech@2468"
+          ADMIN_EMAIL: "jeeva7777@gmail.com"
+          EMAIL_SERVICE: "gmail"
+          NODE_ENV: "stage"
+          LIMIT: 20
+          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"
+      Runtime: nodejs18.x
+      MemorySize: 256
+      Timeout: 60
+      Layers:
+        - !Ref CommonLayer
     Metadata:
       BuildMethod: nodejs18.x
 
-  manageDonations:
+  # retrieveNGOInfo - Production Environment
+  retrieveNGOInfoProd:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/handlers/retrieveNGOInfo
+      Handler: index.handler
+      FunctionName: "retrieveNGOInfo-prod"
+      Description: "retrieveNGOInfo - PRODUCTION"
+      Role: !GetAtt lambdaExecutionRole.Arn
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: "/prod/retrieveNGOInfo"
+            Method: POST
+      Environment:
+        Variables:
+          DB_HOST: !GetAtt ProductionDatabase.Endpoint.Address
+          DB_NAME: empbackendprod
+          DB_USER: !Ref ProdDBUserName
+          DB_PASSWORD: !Ref ProdDBPassword
+          DB_PORT: !GetAtt ProductionDatabase.Endpoint.Port
+          ENVIRONMENT: "prod"
+          EMAIL_USER: "teamtech993@gmail.com"
+          EMAIL_PASS: "Tech@2468"
+          ADMIN_EMAIL: "jeeva7777@gmail.com"
+          EMAIL_SERVICE: "gmail"
+          NODE_ENV: "production"
+          LIMIT: 20
+          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"
+      Runtime: nodejs18.x
+      MemorySize: 256
+      Timeout: 60
+      Layers:
+        - !Ref CommonLayer
+    Metadata:
+      BuildMethod: nodejs18.x
+
+  # manageDonations - Stage Environment
+  manageDonationsStage:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: src/handlers/manageDonations
       Handler: index.handler
-      FunctionName: manageDonations
-      Description: "A lambda to add or update donations."
+      FunctionName: "manageDonations-stage"
+      Description: "manageDonations - STAGE"
       Role: !GetAtt lambdaExecutionRole.Arn
       Events:
         Api:
           Type: Api
           Properties:
-            Path: "/manageDonations"
+            Path: "/stage/manageDonations"
             Method: POST
       Environment:
         Variables:
-          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"            
-      # Layers:
-      #  - !Ref CommonCodeLayer
+          DB_HOST: !GetAtt StageDatabase.Endpoint.Address
+          DB_NAME: empbackendstage
+          DB_USER: !Ref StageDBUserName
+          DB_PASSWORD: !Ref StageDBPassword
+          DB_PORT: !GetAtt StageDatabase.Endpoint.Port
+          ENVIRONMENT: "stage"
+          EMAIL_USER: "teamtech993@gmail.com"
+          EMAIL_PASS: "Tech@2468"
+          ADMIN_EMAIL: "jeeva7777@gmail.com"
+          EMAIL_SERVICE: "gmail"
+          NODE_ENV: "stage"
+          LIMIT: 20
+          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"
+      Runtime: nodejs18.x
+      MemorySize: 256
+      Timeout: 60
+      Layers:
+        - !Ref CommonLayer
     Metadata:
       BuildMethod: nodejs18.x
 
-  userSignIn:
+  # manageDonations - Production Environment
+  manageDonationsProd:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/handlers/manageDonations
+      Handler: index.handler
+      FunctionName: "manageDonations-prod"
+      Description: "manageDonations - PRODUCTION"
+      Role: !GetAtt lambdaExecutionRole.Arn
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: "/prod/manageDonations"
+            Method: POST
+      Environment:
+        Variables:
+          DB_HOST: !GetAtt ProductionDatabase.Endpoint.Address
+          DB_NAME: empbackendprod
+          DB_USER: !Ref ProdDBUserName
+          DB_PASSWORD: !Ref ProdDBPassword
+          DB_PORT: !GetAtt ProductionDatabase.Endpoint.Port
+          ENVIRONMENT: "prod"
+          EMAIL_USER: "teamtech993@gmail.com"
+          EMAIL_PASS: "Tech@2468"
+          ADMIN_EMAIL: "jeeva7777@gmail.com"
+          EMAIL_SERVICE: "gmail"
+          NODE_ENV: "production"
+          LIMIT: 20
+          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"
+      Runtime: nodejs18.x
+      MemorySize: 256
+      Timeout: 60
+      Layers:
+        - !Ref CommonLayer
+    Metadata:
+      BuildMethod: nodejs18.x
+
+  # userSignIn - Stage Environment
+  userSignInStage:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: src/handlers/userSignIn
       Handler: index.handler
-      FunctionName: userSignIn
-      Description: "A lambda to handle user sign in."
+      FunctionName: "userSignIn-stage"
+      Description: "userSignIn - STAGE"
       Role: !GetAtt lambdaExecutionRole.Arn
       Events:
         Api:
           Type: Api
           Properties:
-            Path: "/userSignIn"
-            Method: POST            
+            Path: "/stage/userSignIn"
+            Method: POST
       Environment:
         Variables:
+          DB_HOST: !GetAtt StageDatabase.Endpoint.Address
+          DB_NAME: empbackendstage
+          DB_USER: !Ref StageDBUserName
+          DB_PASSWORD: !Ref StageDBPassword
+          DB_PORT: !GetAtt StageDatabase.Endpoint.Port
+          ENVIRONMENT: "stage"
+          EMAIL_USER: "teamtech993@gmail.com"
+          EMAIL_PASS: "Tech@2468"
+          ADMIN_EMAIL: "jeeva7777@gmail.com"
+          EMAIL_SERVICE: "gmail"
+          NODE_ENV: "stage"
+          LIMIT: 20
           JWT_SECRET_PARAM: "/emp-backend/jwt-secret"
-      Environment:
-        Variables:
-          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"                  
-      # Layers:
-      #  - !Ref CommonCodeLayer
+      Runtime: nodejs18.x
+      MemorySize: 256
+      Timeout: 60
+      Layers:
+        - !Ref CommonLayer
     Metadata:
       BuildMethod: nodejs18.x
 
-  
-  # retrieveReceiptData:
-  #   Type: AWS::Serverless::Function
-  #   Properties:
-  #     CodeUri: src/handlers/retrieveReceiptData
-  #     Handler: index.handler
-  #     FunctionName: retrieveReceiptData
-  #     Description: "A lambda to fetch Receipt Data."
-  #     Role: !GetAtt lambdaExecutionRole.Arn
-  #     Events:
-  #       Api:
-  #         Type: Api
-  #         Properties:
-  #           Path: "/retrieveReceiptData"
-  #           Method: POST
-  #     Environment:
-  #       Variables:
-  #         JWT_SECRET_PARAM: "/emp-backend/jwt-secret"            
-  #     # Layers:
-  #     #  - !Ref CommonCodeLayer
-  #   Metadata:
-  #     BuildMethod: nodejs18.x
+  # userSignIn - Production Environment
+  userSignInProd:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/handlers/userSignIn
+      Handler: index.handler
+      FunctionName: "userSignIn-prod"
+      Description: "userSignIn - PRODUCTION"
+      Role: !GetAtt lambdaExecutionRole.Arn
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: "/prod/userSignIn"
+            Method: POST
+      Environment:
+        Variables:
+          DB_HOST: !GetAtt ProductionDatabase.Endpoint.Address
+          DB_NAME: empbackendprod
+          DB_USER: !Ref ProdDBUserName
+          DB_PASSWORD: !Ref ProdDBPassword
+          DB_PORT: !GetAtt ProductionDatabase.Endpoint.Port
+          ENVIRONMENT: "prod"
+          EMAIL_USER: "teamtech993@gmail.com"
+          EMAIL_PASS: "Tech@2468"
+          ADMIN_EMAIL: "jeeva7777@gmail.com"
+          EMAIL_SERVICE: "gmail"
+          NODE_ENV: "production"
+          LIMIT: 20
+          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"
+      Runtime: nodejs18.x
+      MemorySize: 256
+      Timeout: 60
+      Layers:
+        - !Ref CommonLayer
+    Metadata:
+      BuildMethod: nodejs18.x
 
-  manageSubsPackage:
+  # manageSubsPackage - Stage Environment
+  manageSubsPackageStage:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: src/handlers/manageSubsPackage
       Handler: index.handler
-      FunctionName: manageSubsPackage
-      Description: "A lambda to handle subscription Plan."
+      FunctionName: "manageSubsPackage-stage"
+      Description: "manageSubsPackage - STAGE"
       Role: !GetAtt lambdaExecutionRole.Arn
       Events:
         Api:
           Type: Api
           Properties:
-            Path: "/manageSubsPackage"
+            Path: "/stage/manageSubsPackage"
             Method: POST
       Environment:
         Variables:
-          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"            
-      # Layers:
-      #  - !Ref CommonCodeLayer
+          DB_HOST: !GetAtt StageDatabase.Endpoint.Address
+          DB_NAME: empbackendstage
+          DB_USER: !Ref StageDBUserName
+          DB_PASSWORD: !Ref StageDBPassword
+          DB_PORT: !GetAtt StageDatabase.Endpoint.Port
+          ENVIRONMENT: "stage"
+          EMAIL_USER: "teamtech993@gmail.com"
+          EMAIL_PASS: "Tech@2468"
+          ADMIN_EMAIL: "jeeva7777@gmail.com"
+          EMAIL_SERVICE: "gmail"
+          NODE_ENV: "stage"
+          LIMIT: 20
+          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"
+      Runtime: nodejs18.x
+      MemorySize: 256
+      Timeout: 60
+      Layers:
+        - !Ref CommonLayer
     Metadata:
-      BuildMethod: nodejs18.x 
+      BuildMethod: nodejs18.x
 
-  retrieveSubsPackages:
+  # manageSubsPackage - Production Environment
+  manageSubsPackageProd:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/handlers/manageSubsPackage
+      Handler: index.handler
+      FunctionName: "manageSubsPackage-prod"
+      Description: "manageSubsPackage - PRODUCTION"
+      Role: !GetAtt lambdaExecutionRole.Arn
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: "/prod/manageSubsPackage"
+            Method: POST
+      Environment:
+        Variables:
+          DB_HOST: !GetAtt ProductionDatabase.Endpoint.Address
+          DB_NAME: empbackendprod
+          DB_USER: !Ref ProdDBUserName
+          DB_PASSWORD: !Ref ProdDBPassword
+          DB_PORT: !GetAtt ProductionDatabase.Endpoint.Port
+          ENVIRONMENT: "prod"
+          EMAIL_USER: "teamtech993@gmail.com"
+          EMAIL_PASS: "Tech@2468"
+          ADMIN_EMAIL: "jeeva7777@gmail.com"
+          EMAIL_SERVICE: "gmail"
+          NODE_ENV: "production"
+          LIMIT: 20
+          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"
+      Runtime: nodejs18.x
+      MemorySize: 256
+      Timeout: 60
+      Layers:
+        - !Ref CommonLayer
+    Metadata:
+      BuildMethod: nodejs18.x
+
+  # retrieveSubsPackages - Stage Environment
+  retrieveSubsPackagesStage:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: src/handlers/retrieveSubsPackages
       Handler: index.handler
-      FunctionName: retrieveSubsPackages
-      Description: "A lambda to handle subscription Plan."
+      FunctionName: "retrieveSubsPackages-stage"
+      Description: "retrieveSubsPackages - STAGE"
       Role: !GetAtt lambdaExecutionRole.Arn
       Events:
         Api:
           Type: Api
           Properties:
-            Path: "/retrieveSubsPackages"
+            Path: "/stage/retrieveSubsPackages"
             Method: POST
       Environment:
         Variables:
-          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"            
-      # Layers:
-      #  - !Ref CommonCodeLayer
+          DB_HOST: !GetAtt StageDatabase.Endpoint.Address
+          DB_NAME: empbackendstage
+          DB_USER: !Ref StageDBUserName
+          DB_PASSWORD: !Ref StageDBPassword
+          DB_PORT: !GetAtt StageDatabase.Endpoint.Port
+          ENVIRONMENT: "stage"
+          EMAIL_USER: "teamtech993@gmail.com"
+          EMAIL_PASS: "Tech@2468"
+          ADMIN_EMAIL: "jeeva7777@gmail.com"
+          EMAIL_SERVICE: "gmail"
+          NODE_ENV: "stage"
+          LIMIT: 20
+          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"
+      Runtime: nodejs18.x
+      MemorySize: 256
+      Timeout: 60
+      Layers:
+        - !Ref CommonLayer
     Metadata:
       BuildMethod: nodejs18.x
 
-  retrieveDonorInfo:
+  # retrieveSubsPackages - Production Environment
+  retrieveSubsPackagesProd:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/handlers/retrieveSubsPackages
+      Handler: index.handler
+      FunctionName: "retrieveSubsPackages-prod"
+      Description: "retrieveSubsPackages - PRODUCTION"
+      Role: !GetAtt lambdaExecutionRole.Arn
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: "/prod/retrieveSubsPackages"
+            Method: POST
+      Environment:
+        Variables:
+          DB_HOST: !GetAtt ProductionDatabase.Endpoint.Address
+          DB_NAME: empbackendprod
+          DB_USER: !Ref ProdDBUserName
+          DB_PASSWORD: !Ref ProdDBPassword
+          DB_PORT: !GetAtt ProductionDatabase.Endpoint.Port
+          ENVIRONMENT: "prod"
+          EMAIL_USER: "teamtech993@gmail.com"
+          EMAIL_PASS: "Tech@2468"
+          ADMIN_EMAIL: "jeeva7777@gmail.com"
+          EMAIL_SERVICE: "gmail"
+          NODE_ENV: "production"
+          LIMIT: 20
+          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"
+      Runtime: nodejs18.x
+      MemorySize: 256
+      Timeout: 60
+      Layers:
+        - !Ref CommonLayer
+    Metadata:
+      BuildMethod: nodejs18.x
+
+  # retrieveDonorInfo - Stage Environment
+  retrieveDonorInfoStage:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: src/handlers/retrieveDonorInfo
       Handler: index.handler
-      FunctionName: retrieveDonorInfo
-      Description: "A lambda to handle subscription Plan."
+      FunctionName: "retrieveDonorInfo-stage"
+      Description: "retrieveDonorInfo - STAGE"
       Role: !GetAtt lambdaExecutionRole.Arn
       Events:
         Api:
           Type: Api
           Properties:
-            Path: "/retrieveDonorInfo"
+            Path: "/stage/retrieveDonorInfo"
             Method: POST
       Environment:
         Variables:
-          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"            
-      # Layers:
-      #  - !Ref CommonCodeLayer
+          DB_HOST: !GetAtt StageDatabase.Endpoint.Address
+          DB_NAME: empbackendstage
+          DB_USER: !Ref StageDBUserName
+          DB_PASSWORD: !Ref StageDBPassword
+          DB_PORT: !GetAtt StageDatabase.Endpoint.Port
+          ENVIRONMENT: "stage"
+          EMAIL_USER: "teamtech993@gmail.com"
+          EMAIL_PASS: "Tech@2468"
+          ADMIN_EMAIL: "jeeva7777@gmail.com"
+          EMAIL_SERVICE: "gmail"
+          NODE_ENV: "stage"
+          LIMIT: 20
+          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"
+      Runtime: nodejs18.x
+      MemorySize: 256
+      Timeout: 60
+      Layers:
+        - !Ref CommonLayer
     Metadata:
       BuildMethod: nodejs18.x
 
-  importStatement:
+  # retrieveDonorInfo - Production Environment
+  retrieveDonorInfoProd:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/handlers/retrieveDonorInfo
+      Handler: index.handler
+      FunctionName: "retrieveDonorInfo-prod"
+      Description: "retrieveDonorInfo - PRODUCTION"
+      Role: !GetAtt lambdaExecutionRole.Arn
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: "/prod/retrieveDonorInfo"
+            Method: POST
+      Environment:
+        Variables:
+          DB_HOST: !GetAtt ProductionDatabase.Endpoint.Address
+          DB_NAME: empbackendprod
+          DB_USER: !Ref ProdDBUserName
+          DB_PASSWORD: !Ref ProdDBPassword
+          DB_PORT: !GetAtt ProductionDatabase.Endpoint.Port
+          ENVIRONMENT: "prod"
+          EMAIL_USER: "teamtech993@gmail.com"
+          EMAIL_PASS: "Tech@2468"
+          ADMIN_EMAIL: "jeeva7777@gmail.com"
+          EMAIL_SERVICE: "gmail"
+          NODE_ENV: "production"
+          LIMIT: 20
+          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"
+      Runtime: nodejs18.x
+      MemorySize: 256
+      Timeout: 60
+      Layers:
+        - !Ref CommonLayer
+    Metadata:
+      BuildMethod: nodejs18.x
+
+  # importStatement - Stage Environment
+  importStatementStage:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: src/handlers/importStatement
       Handler: index.handler
-      FunctionName: importStatement
-      Description: "A lambda to handle subscription Plan."
+      FunctionName: "importStatement-stage"
+      Description: "importStatement - STAGE"
       Role: !GetAtt lambdaExecutionRole.Arn
       Events:
         Api:
           Type: Api
           Properties:
-            Path: "/importStatement"
+            Path: "/stage/importStatement"
             Method: POST
       Environment:
         Variables:
-          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"            
-      # Layers:
-      #  - !Ref CommonCodeLayer
+          DB_HOST: !GetAtt StageDatabase.Endpoint.Address
+          DB_NAME: empbackendstage
+          DB_USER: !Ref StageDBUserName
+          DB_PASSWORD: !Ref StageDBPassword
+          DB_PORT: !GetAtt StageDatabase.Endpoint.Port
+          ENVIRONMENT: "stage"
+          EMAIL_USER: "teamtech993@gmail.com"
+          EMAIL_PASS: "Tech@2468"
+          ADMIN_EMAIL: "jeeva7777@gmail.com"
+          EMAIL_SERVICE: "gmail"
+          NODE_ENV: "stage"
+          LIMIT: 20
+          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"
+      Runtime: nodejs18.x
+      MemorySize: 256
+      Timeout: 60
+      Layers:
+        - !Ref CommonLayer
     Metadata:
       BuildMethod: nodejs18.x
 
-  retrieveStatementData:
+  # importStatement - Production Environment
+  importStatementProd:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/handlers/importStatement
+      Handler: index.handler
+      FunctionName: "importStatement-prod"
+      Description: "importStatement - PRODUCTION"
+      Role: !GetAtt lambdaExecutionRole.Arn
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: "/prod/importStatement"
+            Method: POST
+      Environment:
+        Variables:
+          DB_HOST: !GetAtt ProductionDatabase.Endpoint.Address
+          DB_NAME: empbackendprod
+          DB_USER: !Ref ProdDBUserName
+          DB_PASSWORD: !Ref ProdDBPassword
+          DB_PORT: !GetAtt ProductionDatabase.Endpoint.Port
+          ENVIRONMENT: "prod"
+          EMAIL_USER: "teamtech993@gmail.com"
+          EMAIL_PASS: "Tech@2468"
+          ADMIN_EMAIL: "jeeva7777@gmail.com"
+          EMAIL_SERVICE: "gmail"
+          NODE_ENV: "production"
+          LIMIT: 20
+          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"
+      Runtime: nodejs18.x
+      MemorySize: 256
+      Timeout: 60
+      Layers:
+        - !Ref CommonLayer
+    Metadata:
+      BuildMethod: nodejs18.x
+
+  # retrieveStatementData - Stage Environment
+  retrieveStatementDataStage:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: src/handlers/retrieveStatementData
       Handler: index.handler
-      FunctionName: retrieveStatementData
-      Description: "A lambda to handle subscription Plan."
+      FunctionName: "retrieveStatementData-stage"
+      Description: "retrieveStatementData - STAGE"
       Role: !GetAtt lambdaExecutionRole.Arn
       Events:
         Api:
           Type: Api
           Properties:
-            Path: "/retrieveStatementData"
+            Path: "/stage/retrieveStatementData"
             Method: POST
       Environment:
         Variables:
-          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"            
-      # Layers:
-      #  - !Ref CommonCodeLayer
+          DB_HOST: !GetAtt StageDatabase.Endpoint.Address
+          DB_NAME: empbackendstage
+          DB_USER: !Ref StageDBUserName
+          DB_PASSWORD: !Ref StageDBPassword
+          DB_PORT: !GetAtt StageDatabase.Endpoint.Port
+          ENVIRONMENT: "stage"
+          EMAIL_USER: "teamtech993@gmail.com"
+          EMAIL_PASS: "Tech@2468"
+          ADMIN_EMAIL: "jeeva7777@gmail.com"
+          EMAIL_SERVICE: "gmail"
+          NODE_ENV: "stage"
+          LIMIT: 20
+          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"
+      Runtime: nodejs18.x
+      MemorySize: 256
+      Timeout: 60
+      Layers:
+        - !Ref CommonLayer
     Metadata:
       BuildMethod: nodejs18.x
 
-  retrieveDonations:
+  # retrieveStatementData - Production Environment
+  retrieveStatementDataProd:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/handlers/retrieveStatementData
+      Handler: index.handler
+      FunctionName: "retrieveStatementData-prod"
+      Description: "retrieveStatementData - PRODUCTION"
+      Role: !GetAtt lambdaExecutionRole.Arn
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: "/prod/retrieveStatementData"
+            Method: POST
+      Environment:
+        Variables:
+          DB_HOST: !GetAtt ProductionDatabase.Endpoint.Address
+          DB_NAME: empbackendprod
+          DB_USER: !Ref ProdDBUserName
+          DB_PASSWORD: !Ref ProdDBPassword
+          DB_PORT: !GetAtt ProductionDatabase.Endpoint.Port
+          ENVIRONMENT: "prod"
+          EMAIL_USER: "teamtech993@gmail.com"
+          EMAIL_PASS: "Tech@2468"
+          ADMIN_EMAIL: "jeeva7777@gmail.com"
+          EMAIL_SERVICE: "gmail"
+          NODE_ENV: "production"
+          LIMIT: 20
+          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"
+      Runtime: nodejs18.x
+      MemorySize: 256
+      Timeout: 60
+      Layers:
+        - !Ref CommonLayer
+    Metadata:
+      BuildMethod: nodejs18.x
+
+  # retrieveDonations - Stage Environment
+  retrieveDonationsStage:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: src/handlers/retrieveDonations
       Handler: index.handler
-      FunctionName: retrieveDonations
-      Description: "A lambda to fetch Donations records."
+      FunctionName: "retrieveDonations-stage"
+      Description: "retrieveDonations - STAGE"
       Role: !GetAtt lambdaExecutionRole.Arn
       Events:
         Api:
           Type: Api
           Properties:
-            Path: "/retrieveDonations"
+            Path: "/stage/retrieveDonations"
             Method: POST
       Environment:
         Variables:
-          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"            
-      # Layers:
-      #  - !Ref CommonCodeLayer
+          DB_HOST: !GetAtt StageDatabase.Endpoint.Address
+          DB_NAME: empbackendstage
+          DB_USER: !Ref StageDBUserName
+          DB_PASSWORD: !Ref StageDBPassword
+          DB_PORT: !GetAtt StageDatabase.Endpoint.Port
+          ENVIRONMENT: "stage"
+          EMAIL_USER: "teamtech993@gmail.com"
+          EMAIL_PASS: "Tech@2468"
+          ADMIN_EMAIL: "jeeva7777@gmail.com"
+          EMAIL_SERVICE: "gmail"
+          NODE_ENV: "stage"
+          LIMIT: 20
+          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"
+      Runtime: nodejs18.x
+      MemorySize: 256
+      Timeout: 60
+      Layers:
+        - !Ref CommonLayer
     Metadata:
       BuildMethod: nodejs18.x
 
-  sendEmail:
+  # retrieveDonations - Production Environment
+  retrieveDonationsProd:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/handlers/retrieveDonations
+      Handler: index.handler
+      FunctionName: "retrieveDonations-prod"
+      Description: "retrieveDonations - PRODUCTION"
+      Role: !GetAtt lambdaExecutionRole.Arn
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: "/prod/retrieveDonations"
+            Method: POST
+      Environment:
+        Variables:
+          DB_HOST: !GetAtt ProductionDatabase.Endpoint.Address
+          DB_NAME: empbackendprod
+          DB_USER: !Ref ProdDBUserName
+          DB_PASSWORD: !Ref ProdDBPassword
+          DB_PORT: !GetAtt ProductionDatabase.Endpoint.Port
+          ENVIRONMENT: "prod"
+          EMAIL_USER: "teamtech993@gmail.com"
+          EMAIL_PASS: "Tech@2468"
+          ADMIN_EMAIL: "jeeva7777@gmail.com"
+          EMAIL_SERVICE: "gmail"
+          NODE_ENV: "production"
+          LIMIT: 20
+          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"
+      Runtime: nodejs18.x
+      MemorySize: 256
+      Timeout: 60
+      Layers:
+        - !Ref CommonLayer
+    Metadata:
+      BuildMethod: nodejs18.x
+
+  # sendEmail - Stage Environment
+  sendEmailStage:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: src/handlers/sendEmail
       Handler: index.handler
-      FunctionName: sendEmail
-      Description: "A lambda to fetch Donations records."
+      FunctionName: "sendEmail-stage"
+      Description: "sendEmail - STAGE"
       Role: !GetAtt lambdaExecutionRole.Arn
       Events:
         Api:
           Type: Api
           Properties:
-            Path: "/sendEmail"
+            Path: "/stage/sendEmail"
             Method: POST
       Environment:
         Variables:
+          DB_HOST: !GetAtt StageDatabase.Endpoint.Address
+          DB_NAME: empbackendstage
+          DB_USER: !Ref StageDBUserName
+          DB_PASSWORD: !Ref StageDBPassword
+          DB_PORT: !GetAtt StageDatabase.Endpoint.Port
+          ENVIRONMENT: "stage"
+          EMAIL_USER: "teamtech993@gmail.com"
+          EMAIL_PASS: "Tech@2468"
+          ADMIN_EMAIL: "jeeva7777@gmail.com"
+          EMAIL_SERVICE: "gmail"
+          NODE_ENV: "stage"
+          LIMIT: 20
           JWT_SECRET_PARAM: "/emp-backend/jwt-secret"
           SMTP_USER: "support@empowerngo.com"
-          SMTP_PASS: "EmpTech#25"            
-      # Layers:
-      #  - !Ref CommonCodeLayer
+          SMTP_PASS: "EmpTech#25"
+      Runtime: nodejs18.x
+      MemorySize: 256
+      Timeout: 60
+      Layers:
+        - !Ref CommonLayer
     Metadata:
       BuildMethod: nodejs18.x
 
-  retrieveForm10BDData:
+  # sendEmail - Production Environment
+  sendEmailProd:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/handlers/sendEmail
+      Handler: index.handler
+      FunctionName: "sendEmail-prod"
+      Description: "sendEmail - PRODUCTION"
+      Role: !GetAtt lambdaExecutionRole.Arn
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: "/prod/sendEmail"
+            Method: POST
+      Environment:
+        Variables:
+          DB_HOST: !GetAtt ProductionDatabase.Endpoint.Address
+          DB_NAME: empbackendprod
+          DB_USER: !Ref ProdDBUserName
+          DB_PASSWORD: !Ref ProdDBPassword
+          DB_PORT: !GetAtt ProductionDatabase.Endpoint.Port
+          ENVIRONMENT: "prod"
+          EMAIL_USER: "teamtech993@gmail.com"
+          EMAIL_PASS: "Tech@2468"
+          ADMIN_EMAIL: "jeeva7777@gmail.com"
+          EMAIL_SERVICE: "gmail"
+          NODE_ENV: "production"
+          LIMIT: 20
+          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"
+          SMTP_USER: "support@empowerngo.com"
+          SMTP_PASS: "EmpTech#25"
+      Runtime: nodejs18.x
+      MemorySize: 256
+      Timeout: 60
+      Layers:
+        - !Ref CommonLayer
+    Metadata:
+      BuildMethod: nodejs18.x
+
+  # retrieveForm10BDData - Stage Environment
+  retrieveForm10BDDataStage:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: src/handlers/retrieveForm10BDData
       Handler: index.handler
-      FunctionName: retrieveForm10BDData
-      Description: "A lambda to fetch form 10BD data records."
+      FunctionName: "retrieveForm10BDData-stage"
+      Description: "retrieveForm10BDData - STAGE"
       Role: !GetAtt lambdaExecutionRole.Arn
       Events:
         Api:
           Type: Api
           Properties:
-            Path: "/retrieveForm10BDData"
+            Path: "/stage/retrieveForm10BDData"
             Method: POST
       Environment:
         Variables:
-          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"                    
-      # Layers:
-      #  - !Ref CommonCodeLayer
+          DB_HOST: !GetAtt StageDatabase.Endpoint.Address
+          DB_NAME: empbackendstage
+          DB_USER: !Ref StageDBUserName
+          DB_PASSWORD: !Ref StageDBPassword
+          DB_PORT: !GetAtt StageDatabase.Endpoint.Port
+          ENVIRONMENT: "stage"
+          EMAIL_USER: "teamtech993@gmail.com"
+          EMAIL_PASS: "Tech@2468"
+          ADMIN_EMAIL: "jeeva7777@gmail.com"
+          EMAIL_SERVICE: "gmail"
+          NODE_ENV: "stage"
+          LIMIT: 20
+          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"
+      Runtime: nodejs18.x
+      MemorySize: 256
+      Timeout: 60
+      Layers:
+        - !Ref CommonLayer
     Metadata:
       BuildMethod: nodejs18.x
 
-  retrieveDashBoardData:
+  # retrieveForm10BDData - Production Environment
+  retrieveForm10BDDataProd:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/handlers/retrieveForm10BDData
+      Handler: index.handler
+      FunctionName: "retrieveForm10BDData-prod"
+      Description: "retrieveForm10BDData - PRODUCTION"
+      Role: !GetAtt lambdaExecutionRole.Arn
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: "/prod/retrieveForm10BDData"
+            Method: POST
+      Environment:
+        Variables:
+          DB_HOST: !GetAtt ProductionDatabase.Endpoint.Address
+          DB_NAME: empbackendprod
+          DB_USER: !Ref ProdDBUserName
+          DB_PASSWORD: !Ref ProdDBPassword
+          DB_PORT: !GetAtt ProductionDatabase.Endpoint.Port
+          ENVIRONMENT: "prod"
+          EMAIL_USER: "teamtech993@gmail.com"
+          EMAIL_PASS: "Tech@2468"
+          ADMIN_EMAIL: "jeeva7777@gmail.com"
+          EMAIL_SERVICE: "gmail"
+          NODE_ENV: "production"
+          LIMIT: 20
+          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"
+      Runtime: nodejs18.x
+      MemorySize: 256
+      Timeout: 60
+      Layers:
+        - !Ref CommonLayer
+    Metadata:
+      BuildMethod: nodejs18.x
+
+  # retrieveDashBoardData - Stage Environment
+  retrieveDashBoardDataStage:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: src/handlers/retrieveDashBoardData
       Handler: index.handler
-      FunctionName: retrieveDashBoardData
-      Description: "A lambda to fetch dashboard Data."
+      FunctionName: "retrieveDashBoardData-stage"
+      Description: "retrieveDashBoardData - STAGE"
       Role: !GetAtt lambdaExecutionRole.Arn
       Events:
         Api:
           Type: Api
           Properties:
-            Path: "/retrieveDashBoardData"
+            Path: "/stage/retrieveDashBoardData"
             Method: POST
       Environment:
         Variables:
-          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"                    
-      # Layers:
-      #  - !Ref CommonCodeLayer
+          DB_HOST: !GetAtt StageDatabase.Endpoint.Address
+          DB_NAME: empbackendstage
+          DB_USER: !Ref StageDBUserName
+          DB_PASSWORD: !Ref StageDBPassword
+          DB_PORT: !GetAtt StageDatabase.Endpoint.Port
+          ENVIRONMENT: "stage"
+          EMAIL_USER: "teamtech993@gmail.com"
+          EMAIL_PASS: "Tech@2468"
+          ADMIN_EMAIL: "jeeva7777@gmail.com"
+          EMAIL_SERVICE: "gmail"
+          NODE_ENV: "stage"
+          LIMIT: 20
+          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"
+      Runtime: nodejs18.x
+      MemorySize: 256
+      Timeout: 60
+      Layers:
+        - !Ref CommonLayer
     Metadata:
       BuildMethod: nodejs18.x
 
-  retrieveUsageNPlanInfo:
+  # retrieveDashBoardData - Production Environment
+  retrieveDashBoardDataProd:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/handlers/retrieveDashBoardData
+      Handler: index.handler
+      FunctionName: "retrieveDashBoardData-prod"
+      Description: "retrieveDashBoardData - PRODUCTION"
+      Role: !GetAtt lambdaExecutionRole.Arn
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: "/prod/retrieveDashBoardData"
+            Method: POST
+      Environment:
+        Variables:
+          DB_HOST: !GetAtt ProductionDatabase.Endpoint.Address
+          DB_NAME: empbackendprod
+          DB_USER: !Ref ProdDBUserName
+          DB_PASSWORD: !Ref ProdDBPassword
+          DB_PORT: !GetAtt ProductionDatabase.Endpoint.Port
+          ENVIRONMENT: "prod"
+          EMAIL_USER: "teamtech993@gmail.com"
+          EMAIL_PASS: "Tech@2468"
+          ADMIN_EMAIL: "jeeva7777@gmail.com"
+          EMAIL_SERVICE: "gmail"
+          NODE_ENV: "production"
+          LIMIT: 20
+          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"
+      Runtime: nodejs18.x
+      MemorySize: 256
+      Timeout: 60
+      Layers:
+        - !Ref CommonLayer
+    Metadata:
+      BuildMethod: nodejs18.x
+
+  # retrieveUsageNPlanInfo - Stage Environment
+  retrieveUsageNPlanInfoStage:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: src/handlers/retrieveUsageNPlanInfo
       Handler: index.handler
-      FunctionName: retrieveUsageNPlanInfo
-      Description: "A lambda to fetch usage and plan Data."
+      FunctionName: "retrieveUsageNPlanInfo-stage"
+      Description: "retrieveUsageNPlanInfo - STAGE"
       Role: !GetAtt lambdaExecutionRole.Arn
       Events:
         Api:
           Type: Api
           Properties:
-            Path: "/retrieveUsageNPlanInfo"
+            Path: "/stage/retrieveUsageNPlanInfo"
             Method: POST
       Environment:
         Variables:
-          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"                    
-      # Layers:
-      #  - !Ref CommonCodeLayer
+          DB_HOST: !GetAtt StageDatabase.Endpoint.Address
+          DB_NAME: empbackendstage
+          DB_USER: !Ref StageDBUserName
+          DB_PASSWORD: !Ref StageDBPassword
+          DB_PORT: !GetAtt StageDatabase.Endpoint.Port
+          ENVIRONMENT: "stage"
+          EMAIL_USER: "teamtech993@gmail.com"
+          EMAIL_PASS: "Tech@2468"
+          ADMIN_EMAIL: "jeeva7777@gmail.com"
+          EMAIL_SERVICE: "gmail"
+          NODE_ENV: "stage"
+          LIMIT: 20
+          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"
+      Runtime: nodejs18.x
+      MemorySize: 256
+      Timeout: 60
+      Layers:
+        - !Ref CommonLayer
     Metadata:
       BuildMethod: nodejs18.x
 
+  # retrieveUsageNPlanInfo - Production Environment
+  retrieveUsageNPlanInfoProd:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/handlers/retrieveUsageNPlanInfo
+      Handler: index.handler
+      FunctionName: "retrieveUsageNPlanInfo-prod"
+      Description: "retrieveUsageNPlanInfo - PRODUCTION"
+      Role: !GetAtt lambdaExecutionRole.Arn
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: "/prod/retrieveUsageNPlanInfo"
+            Method: POST
+      Environment:
+        Variables:
+          DB_HOST: !GetAtt ProductionDatabase.Endpoint.Address
+          DB_NAME: empbackendprod
+          DB_USER: !Ref ProdDBUserName
+          DB_PASSWORD: !Ref ProdDBPassword
+          DB_PORT: !GetAtt ProductionDatabase.Endpoint.Port
+          ENVIRONMENT: "prod"
+          EMAIL_USER: "teamtech993@gmail.com"
+          EMAIL_PASS: "Tech@2468"
+          ADMIN_EMAIL: "jeeva7777@gmail.com"
+          EMAIL_SERVICE: "gmail"
+          NODE_ENV: "production"
+          LIMIT: 20
+          JWT_SECRET_PARAM: "/emp-backend/jwt-secret"
+      Runtime: nodejs18.x
+      MemorySize: 256
+      Timeout: 60
+      Layers:
+        - !Ref CommonLayer
+    Metadata:
+      BuildMethod: nodejs18.x
+
+  # userSignIn - Stage Environment
+  userSignInStage:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/handlers/userSignIn
+      Handler: index.handler
+      FunctionName: "userSignIn-stage"
+      Description: "userSignIn - STAGE"
+      Role: !GetAtt lambdaExecutionRole.Arn
+      Runtime: nodejs18.x
+      Timeout: 60
+      MemorySize: 512
+      Layers:
+        - !Ref CommonLayer
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: "/stage/userSignIn"
+            Method: POST
+      Environment:
+        Variables:
+          DB_HOST: !GetAtt StageDatabase.Endpoint.Address
+          DB_NAME: empbackendstage
+          DB_USER: !Ref StageDBUserName
+          DB_PASSWORD: !Ref StageDBPassword
+          DB_PORT: !GetAtt StageDatabase.Endpoint.Port
+          ENVIRONMENT: "stage"
+          EMAIL_USER: "teamtech993@gmail.com"
+          EMAIL_PASS: "Tech@2468"
+          ADMIN_EMAIL: "jeeva7777@gmail.com"
+          EMAIL_SERVICE: "gmail"
+          NODE_ENV: "stage"
+          LIMIT: 20
+          JWT_SECRET_PARAM: "/emp-backend/stage/jwt-secret"
+    Metadata:
+      BuildMethod: nodejs18.x
+
+  # userSignIn - Production Environment
+  userSignInProd:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/handlers/userSignIn
+      Handler: index.handler
+      FunctionName: "userSignIn-prod"
+      Description: "userSignIn - PRODUCTION"
+      Role: !GetAtt lambdaExecutionRole.Arn
+      Runtime: nodejs18.x
+      Timeout: 60
+      MemorySize: 512
+      Layers:
+        - !Ref CommonLayer
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: "/prod/userSignIn"
+            Method: POST
+      Environment:
+        Variables:
+          DB_HOST: !GetAtt ProductionDatabase.Endpoint.Address
+          DB_NAME: empbackendprod
+          DB_USER: !Ref ProdDBUserName
+          DB_PASSWORD: !Ref ProdDBPassword
+          DB_PORT: !GetAtt ProductionDatabase.Endpoint.Port
+          ENVIRONMENT: "prod"
+          EMAIL_USER: "teamtech993@gmail.com"
+          EMAIL_PASS: "Tech@2468"
+          ADMIN_EMAIL: "jeeva7777@gmail.com"
+          EMAIL_SERVICE: "gmail"
+          NODE_ENV: "production"
+          LIMIT: 20
+          JWT_SECRET_PARAM: "/emp-backend/prod/jwt-secret"
+    Metadata:
+      BuildMethod: nodejs18.x
+
+Outputs:
+  UnifiedApiGatewayUrl:
+    Description: "Unified API Gateway endpoint URL"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod"
+    Export:
+      Name: !Sub "${AWS::StackName}-ApiGatewayUrl"
+
+  StageApiExample:
+    Description: "Example Stage API endpoint"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/stage/userSignIn"
+    Export:
+      Name: !Sub "${AWS::StackName}-StageApiExample"
+
+  ProdApiExample:
+    Description: "Example Production API endpoint"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/prod/userSignIn"
+    Export:
+      Name: !Sub "${AWS::StackName}-ProdApiExample"
+
+  StageDatabaseEndpoint:
+    Description: "Stage database endpoint"
+    Value: !GetAtt StageDatabase.Endpoint.Address
+    Export:
+      Name: !Sub "${AWS::StackName}-StageDatabaseEndpoint"
+
+  ProductionDatabaseEndpoint:
+    Description: "Production database endpoint"
+    Value: !GetAtt ProductionDatabase.Endpoint.Address
+    Export:
+      Name: !Sub "${AWS::StackName}-ProductionDatabaseEndpoint"
+
+  AllStageEndpoints:
+    Description: "All Stage API endpoints"
+    Value: !Sub |
+      Stage Endpoints (All point to staging database):
+      https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/stage/manageDonor
+      https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/stage/manageNGO
+      https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/stage/userSignIn
+      https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/stage/manageDonations
+      (... and all other functions under /stage/)
+
+  AllProdEndpoints:
+    Description: "All Production API endpoints"
+    Value: !Sub |
+      Production Endpoints (All point to production database):
+      https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/prod/manageDonor
+      https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/prod/manageNGO
+      https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/prod/userSignIn
+      https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/prod/manageDonations
+      (... and all other functions under /prod/)
