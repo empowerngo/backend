@@ -75,18 +75,18 @@ Resources:
     Properties:
       DBInstanceIdentifier: emp-backend-prod-db-uni-1751365483
       DBName: empbackendprod
-      DBInstanceClass: db.t3.small
+      DBInstanceClass: db.t3.micro
       Engine: mysql
       EngineVersion: "8.0.35"
       MasterUsername: !Ref ProdDBUserName
       MasterUserPassword: !Ref ProdDBPassword
-      AllocatedStorage: 100
+      AllocatedStorage: 20
       StorageType: gp2
-      BackupRetentionPeriod: 30
+      BackupRetentionPeriod: 7
       PubliclyAccessible: true
       DeletionProtection: true
       StorageEncrypted: true
-      MultiAZ: true
+      MultiAZ: false
       Tags:
         - Key: Environment
           Value: prod
